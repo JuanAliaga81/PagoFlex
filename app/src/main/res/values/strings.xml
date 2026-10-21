@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nombre de la aplicación -->
+    <string name="app_name">PagoFlex</string>
+
+    <!-- Pantalla de selección de roles -->
+    <string name="titulo_app">PagoFlex</string>
+    <string name="descripcion_app">Gestión de pagos y compromisos</string>
+    <string name="bienvenido">Bienvenido</string>
+    <string name="seleccionar_rol">Selecciona tu tipo de usuario</string>
+
+    <!-- Roles -->
+    <string name="rol_usuario">Usuario final</string>
+    <string name="rol_agente">Agente PagoFlex</string>
+    <string name="rol_ejecutivo">Ejecutivo de empresa</string>
+
+    <!-- Textos generales -->
+    <string name="proyecto_academico">Proyecto académico - PagoFlex</string>
+    <string name="volver">Volver</string>
+    <string name="ingreso_rol">Has ingresado como: %1$s</string>
+</resources>

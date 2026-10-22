@@ -7,29 +7,56 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+
 import cl.duoc.pagoflex.R
 import cl.duoc.pagoflex.model.Compromiso
+import cl.duoc.pagoflex.model.ComprobantePago
 import cl.duoc.pagoflex.model.EstadoCompromiso
+import cl.duoc.pagoflex.model.MotivoBloqueoPago
 import cl.duoc.pagoflex.ui.styles.EstilosTarjeta
 import cl.duoc.pagoflex.ui.theme.Dimens
+
 import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
 fun DetalleCompromisoScreen(
     compromiso: Compromiso,
+    motivoBloqueo: MotivoBloqueoPago?,
     modifier: Modifier = Modifier,
-    onVolver: () -> Unit
+    onVolver: () -> Unit,
+    onConfirmarPago: (String) -> ComprobantePago?
 ) {
+
+    // Formato de montos en pesos chilenos
     val formato = NumberFormat.getIntegerInstance(
         Locale.forLanguageTag("es-CL")
     )
 
     val total = compromiso.monto + compromiso.recargo
 
+    // Variables para controlar los avisos
+    var mostrarConfirmacion by remember {
+        mutableStateOf(false)
+    }
+
+    var comprobanteCreado by remember {
+        mutableStateOf<ComprobantePago?>(null)
+    }
+
+    var mostrarError by remember {
+        mutableStateOf(false)
+    }
+
+    // Texto correspondiente al estado
     val estadoTexto = when (compromiso.estado) {
+
         EstadoCompromiso.PENDIENTE ->
             stringResource(R.string.estado_pendiente)
 
@@ -46,6 +73,28 @@ fun DetalleCompromisoScreen(
             stringResource(R.string.estado_anulado)
     }
 
+    // Mensaje cuando no se puede pagar
+    val mensajeBloqueo = when (motivoBloqueo) {
+
+        MotivoBloqueoPago.NO_ENCONTRADO ->
+            stringResource(R.string.pago_no_encontrado)
+
+        MotivoBloqueoPago.YA_PAGADO ->
+            stringResource(R.string.pago_ya_pagado)
+
+        MotivoBloqueoPago.EN_REVISION ->
+            stringResource(R.string.pago_en_revision)
+
+        MotivoBloqueoPago.ANULADO ->
+            stringResource(R.string.pago_anulado)
+
+        MotivoBloqueoPago.COMPROMISO_ANTERIOR ->
+            stringResource(R.string.pago_orden)
+
+        null -> null
+    }
+
+    // Pantalla principal del detalle
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -72,12 +121,14 @@ fun DetalleCompromisoScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
+        // Tarjeta con la información del compromiso
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = EstilosTarjeta.forma,
             colors = EstilosTarjeta.colores(),
             elevation = EstilosTarjeta.elevacion()
         ) {
+
             Column(
                 modifier = Modifier.padding(
                     Dimens.espacioPantalla
@@ -146,14 +197,203 @@ fun DetalleCompromisoScreen(
                 )
             }
         }
+
+        Spacer(
+            modifier = Modifier.height(Dimens.espacioGrande)
+        )
+
+        // Botón para iniciar el pago simulado
+        Button(
+            onClick = {
+                mostrarConfirmacion = true
+            },
+            enabled = motivoBloqueo == null,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(R.string.pagar_compromiso)
+            )
+        }
+
+        // Explicar por qué el botón está deshabilitado
+        if (mensajeBloqueo != null) {
+
+            Spacer(
+                modifier = Modifier.height(Dimens.espacioMedio)
+            )
+
+            Text(
+                text = mensajeBloqueo,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+    }
+
+    // Confirmación del pago simulado
+    if (mostrarConfirmacion) {
+
+        AlertDialog(
+            onDismissRequest = {
+                mostrarConfirmacion = false
+            },
+            title = {
+                Text(
+                    stringResource(R.string.pago_confirmar_titulo)
+                )
+            },
+            text = {
+                Text(
+                    stringResource(R.string.pago_confirmar_mensaje)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+
+                        val comprobante = onConfirmarPago(
+                            compromiso.folio
+                        )
+
+                        mostrarConfirmacion = false
+
+                        if (comprobante != null) {
+                            comprobanteCreado = comprobante
+                        } else {
+                            mostrarError = true
+                        }
+                    }
+                ) {
+                    Text(
+                        stringResource(R.string.pago_confirmar)
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        mostrarConfirmacion = false
+                    }
+                ) {
+                    Text(
+                        stringResource(R.string.cancelar)
+                    )
+                }
+            }
+        )
+    }
+
+    // Comprobante después de confirmar el pago
+    comprobanteCreado?.let { comprobante ->
+
+        AlertDialog(
+            onDismissRequest = {
+                comprobanteCreado = null
+            },
+            title = {
+                Text(
+                    stringResource(R.string.comprobante_titulo)
+                )
+            },
+            text = {
+
+                Column {
+
+                    Text(
+                        stringResource(
+                            R.string.comprobante_codigo,
+                            comprobante.codigo
+                        )
+                    )
+
+                    Text(
+                        stringResource(
+                            R.string.comprobante_folio,
+                            comprobante.folioCompromiso
+                        )
+                    )
+
+                    Text(
+                        stringResource(
+                            R.string.comprobante_empresa,
+                            comprobante.empresa
+                        )
+                    )
+
+                    Text(
+                        stringResource(
+                            R.string.comprobante_monto,
+                            formato.format(comprobante.montoTotal)
+                        )
+                    )
+
+                    Text(
+                        stringResource(
+                            R.string.comprobante_fecha,
+                            comprobante.fechaPago
+                        )
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(
+                            Dimens.espacioMedio
+                        )
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        comprobanteCreado = null
+                    }
+                ) {
+                    Text(
+                        stringResource(R.string.cerrar)
+                    )
+                }
+            }
+        )
+    }
+
+    // Mensaje si el pago no puede registrarse
+    if (mostrarError) {
+
+        AlertDialog(
+            onDismissRequest = {
+                mostrarError = false
+            },
+            title = {
+                Text(
+                    stringResource(R.string.pago_error_titulo)
+                )
+            },
+            text = {
+                Text(
+                    stringResource(R.string.pago_error_mensaje)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        mostrarError = false
+                    }
+                ) {
+                    Text(
+                        stringResource(R.string.entendido)
+                    )
+                }
+            }
+        )
     }
 }
 
+// Componente reutilizable para mostrar cada dato
 @Composable
 private fun DatoDetalle(
     titulo: String,
     valor: String
 ) {
+
     Text(
         text = titulo,
         style = MaterialTheme.typography.bodyMedium,

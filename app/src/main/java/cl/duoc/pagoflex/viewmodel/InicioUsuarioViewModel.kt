@@ -1,6 +1,10 @@
 
 package cl.duoc.pagoflex.viewmodel
 
+import cl.duoc.pagoflex.model.MotivoBloqueoPago
+import cl.duoc.pagoflex.model.ComprobantePago
+import java.util.UUID
+import java.util.Locale
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
@@ -80,6 +84,112 @@ class InicioUsuarioViewModel : ViewModel() {
         return compromisos.find {
             it.folio == folio
         }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun validarPago(folio: String): MotivoBloqueoPago? {
+
+        // Buscar el compromiso
+        val compromiso = obtenerCompromiso(folio)
+            ?: return MotivoBloqueoPago.NO_ENCONTRADO
+
+        // Revisar el estado
+        when (compromiso.estado) {
+
+            EstadoCompromiso.PAGADO ->
+                return MotivoBloqueoPago.YA_PAGADO
+
+            EstadoCompromiso.EN_REVISION ->
+                return MotivoBloqueoPago.EN_REVISION
+
+            EstadoCompromiso.ANULADO ->
+                return MotivoBloqueoPago.ANULADO
+
+            else -> {}
+        }
+
+        // Revisar compromisos anteriores de la misma empresa
+        val formato = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+
+        val fechaActual = LocalDate.parse(
+            compromiso.fechaVencimiento,
+            formato
+        )
+
+        val existeAnterior = compromisos.any { otro ->
+
+            val estadoSinResolver =
+                otro.estado == EstadoCompromiso.PENDIENTE ||
+                        otro.estado == EstadoCompromiso.VENCIDO ||
+                        otro.estado == EstadoCompromiso.EN_REVISION
+
+            otro.folio != compromiso.folio &&
+                    otro.empresa == compromiso.empresa &&
+                    estadoSinResolver &&
+                    LocalDate.parse(
+                        otro.fechaVencimiento,
+                        formato
+                    ).isBefore(fechaActual)
+        }
+
+        if (existeAnterior) {
+            return MotivoBloqueoPago.COMPROMISO_ANTERIOR
+        }
+
+        // Sin bloqueos: puede continuar al pago simulado
+        return null
+    }
+
+
+    // Comprobantes generados durante la sesión
+    var comprobantes by mutableStateOf(
+        listOf<ComprobantePago>()
+    )
+        private set
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun simularPago(folio: String): ComprobantePago? {
+
+        // Validar nuevamente antes de registrar
+        if (validarPago(folio) != null) {
+            return null
+        }
+
+        val compromiso = obtenerCompromiso(folio)
+            ?: return null
+
+        // Crear el comprobante
+        val comprobante = ComprobantePago(
+            codigo = "SIM-" + UUID.randomUUID()
+                .toString()
+                .take(8)
+                .uppercase(Locale.ROOT),
+            folioCompromiso = compromiso.folio,
+            empresa = compromiso.empresa,
+            concepto = compromiso.concepto,
+            montoTotal = compromiso.monto + compromiso.recargo,
+            fechaPago = LocalDate.now().format(
+                DateTimeFormatter.ofPattern("dd-MM-yyyy")
+            )
+        )
+
+        // Guardar comprobante
+        comprobantes = comprobantes + comprobante
+
+        // Actualizar el compromiso a PAGADO
+        compromisos = compromisos.map { actual ->
+
+            if (actual.folio == folio) {
+                actual.copy(
+                    estado = EstadoCompromiso.PAGADO
+                )
+            } else {
+                actual
+            }
+        }
+
+        return comprobante
     }
 
 }

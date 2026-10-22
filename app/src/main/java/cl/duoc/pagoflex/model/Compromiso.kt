@@ -17,3 +17,11 @@ data class Compromiso(
     val estado: EstadoCompromiso,
     val recargo: Int = 0
 )
+
+enum class MotivoBloqueoPago {
+    NO_ENCONTRADO,
+    YA_PAGADO,
+    EN_REVISION,
+    ANULADO,
+    COMPROMISO_ANTERIOR
+}

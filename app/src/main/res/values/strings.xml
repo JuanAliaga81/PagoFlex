@@ -76,4 +76,38 @@
     <string name="detalle_vencimiento">Fecha de vencimiento</string>
     <string name="detalle_estado">Estado</string>
 
+
+    <!-- Pago simulado -->
+    <string name="pagar_compromiso">Pagar compromiso</string>
+    <string name="pago_ya_pagado">Este compromiso ya fue pagado.</string>
+    <string name="pago_en_revision">No se puede pagar un compromiso en revisión.</string>
+    <string name="pago_anulado">No se puede pagar un compromiso anulado.</string>
+    <string name="pago_orden">Primero debes resolver el compromiso más antiguo de esta empresa.</string>
+    <string name="pago_no_encontrado">No se encontró el compromiso.</string>
+
+    <!-- Aviso temporal -->
+    <string name="pago_aviso_titulo">Pago simulado</string>
+    <string name="pago_aviso_mensaje">Este compromiso cumple las condiciones para pagar. La confirmación del pago se implementará en el siguiente paso. No se ha registrado ningún pago.</string>
+    <string name="entendido">Entendido</string>
+
+
+    <!-- Confirmación de pago -->
+    <string name="pago_confirmar_titulo">Confirmar pago</string>
+    <string name="pago_confirmar_mensaje">¿Deseas confirmar el pago total de este compromiso? Esta operación es una simulación.</string>
+    <string name="pago_confirmar">Confirmar pago</string>
+    <string name="cancelar">Cancelar</string>
+
+    <!-- Comprobante -->
+    <string name="comprobante_titulo">Comprobante de pago</string>
+    <string name="comprobante_codigo">Código: %1$s</string>
+    <string name="comprobante_folio">Compromiso: %1$s</string>
+    <string name="comprobante_empresa">Empresa: %1$s</string>
+    <string name="comprobante_monto">Monto: $ %1$s</string>
+    <string name="comprobante_fecha">Fecha: %1$s</string>
+    <string name="cerrar">Cerrar</string>
+
+    <!-- Error de pago -->
+    <string name="pago_error_titulo">No se pudo registrar el pago</string>
+    <string name="pago_error_mensaje">El compromiso no cumple las condiciones para pagar. Revisa su estado e inténtalo nuevamente.</string>
+
 </resources>

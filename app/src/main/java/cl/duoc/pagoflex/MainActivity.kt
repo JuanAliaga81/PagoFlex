@@ -86,14 +86,22 @@ class MainActivity : ComponentActivity() {
 
                         if (compromisoSeleccionado != null) {
 
-                            // Pantalla de detalle
+
                             DetalleCompromisoScreen(
                                 compromiso = compromisoSeleccionado,
+                                motivoBloqueo = inicioUsuarioViewModel.validarPago(
+                                    compromisoSeleccionado.folio
+                                ),
                                 modifier = Modifier.padding(padding),
                                 onVolver = {
                                     folioSeleccionado = null
+                                },
+                                onConfirmarPago = { folio ->
+                                    inicioUsuarioViewModel.simularPago(folio)
                                 }
                             )
+
+
 
                         } else {
 

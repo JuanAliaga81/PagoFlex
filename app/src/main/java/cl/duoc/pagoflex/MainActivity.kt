@@ -1,6 +1,7 @@
 
 package cl.duoc.pagoflex
 
+import cl.duoc.pagoflex.ui.screens.usuario.HistorialPagosScreen
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -59,6 +60,12 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf<String?>(null)
                 }
 
+
+                var mostrarHistorial by rememberSaveable {
+                    mutableStateOf(false)
+                }
+
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
                 ) { padding ->
@@ -78,7 +85,7 @@ class MainActivity : ComponentActivity() {
                         stringResource(R.string.rol_usuario)
                     ) {
 
-                        // Buscar el compromiso seleccionado
+
                         val compromisoSeleccionado =
                             folioSeleccionado?.let { folio ->
                                 inicioUsuarioViewModel.obtenerCompromiso(folio)
@@ -86,7 +93,7 @@ class MainActivity : ComponentActivity() {
 
                         if (compromisoSeleccionado != null) {
 
-
+                            // Detalle del compromiso
                             DetalleCompromisoScreen(
                                 compromiso = compromisoSeleccionado,
                                 motivoBloqueo = inicioUsuarioViewModel.validarPago(
@@ -101,23 +108,37 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
 
+                        } else if (mostrarHistorial) {
 
+                            // Historial de pagos
+                            HistorialPagosScreen(
+                                comprobantes = inicioUsuarioViewModel.comprobantes,
+                                modifier = Modifier.padding(padding),
+                                onVolver = {
+                                    mostrarHistorial = false
+                                }
+                            )
 
                         } else {
 
-                            // Pantalla de inicio del usuario
+                            // Inicio del usuario final
                             InicioUsuarioScreen(
                                 viewModel = inicioUsuarioViewModel,
                                 modifier = Modifier.padding(padding),
                                 onVolver = {
                                     folioSeleccionado = null
+                                    mostrarHistorial = false
                                     rolSeleccionado = ""
                                 },
                                 onSeleccionarCompromiso = { folio ->
                                     folioSeleccionado = folio
+                                },
+                                onVerHistorial = {
+                                    mostrarHistorial = true
                                 }
                             )
                         }
+
 
                     } else {
 

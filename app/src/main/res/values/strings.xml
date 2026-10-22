@@ -110,4 +110,17 @@
     <string name="pago_error_titulo">No se pudo registrar el pago</string>
     <string name="pago_error_mensaje">El compromiso no cumple las condiciones para pagar. Revisa su estado e inténtalo nuevamente.</string>
 
+
+    <!-- Historial de pagos -->
+    <string name="historial_boton">Ver historial de pagos</string>
+    <string name="historial_titulo">Mis pagos</string>
+    <string name="historial_buscar">Buscar empresa, folio, código o fecha</string>
+    <string name="historial_recientes">Más recientes primero</string>
+    <string name="historial_antiguos">Más antiguos primero</string>
+    <string name="historial_vacio">Todavía no tienes pagos registrados.</string>
+    <string name="historial_sin_resultados">No se encontraron pagos con esa búsqueda.</string>
+    <string name="historial_ver_comprobante">Toca un pago para ver su comprobante</string>
+    <string name="comprobante_concepto">Concepto: %1$s</string>
+
+
 </resources>

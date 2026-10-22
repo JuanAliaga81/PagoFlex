@@ -15,7 +15,53 @@
     <string name="rol_ejecutivo">Ejecutivo de empresa</string>
 
     <!-- Textos generales -->
-    <string name="proyecto_academico">Proyecto académico - PagoFlex</string>
     <string name="volver">Volver</string>
     <string name="ingreso_rol">Has ingresado como: %1$s</string>
+
+
+    <!-- Inicio del usuario final -->
+    <string name="inicio_titulo">Mi resumen</string>
+    <string name="inicio_total">Total por pagar este mes</string>
+    <string name="inicio_proximo">Próximo vencimiento</string>
+    <string name="inicio_vencidos">Compromisos vencidos</string>
+    <string name="inicio_compromisos">Mis compromisos</string>
+    <string name="inicio_vence">Vence: %1$s</string>
+
+    <!-- Datos ficticios temporales -->
+    <string name="ejemplo_total">$ 630.000</string>
+    <string name="ejemplo_proximo">25-10-2026</string>
+    <string name="ejemplo_vencidos">1</string>
+
+    <string name="ejemplo_empresa1">Crédito Andino</string>
+    <string name="ejemplo_concepto1">Crédito de consumo</string>
+    <string name="ejemplo_monto1">$ 86.400</string>
+
+    <string name="ejemplo_empresa2">Inmobiliaria</string>
+    <string name="ejemplo_concepto2">Arriendo mensual</string>
+    <string name="ejemplo_monto2">$ 520.000</string>
+
+    <string name="ejemplo_empresa3">Club Deportivo</string>
+    <string name="ejemplo_concepto3">Cuota mensual</string>
+    <string name="ejemplo_monto3">$ 23.600</string>
+
+    <string name="estado_pendiente">Pendiente</string>
+    <string name="estado_vencido">Vencido</string>
+
+    <string name="ejemplo_fecha2">28-10-2026</string>
+    <string name="ejemplo_fecha3">20-10-2026</string>
+
+
+    <!-- Formato de montos -->
+    <string name="formato_monto">$ %1$s</string>
+
+    <!-- Mensajes -->
+    <string name="inicio_sin_vencimientos">
+    No hay vencimientos pendientes
+    </string>
+
+    <!-- Estados de compromisos -->
+    <string name="estado_pagado">Pagado</string>
+    <string name="estado_revision">En revisión</string>
+    <string name="estado_anulado">Anulado</string>
+
 </resources>

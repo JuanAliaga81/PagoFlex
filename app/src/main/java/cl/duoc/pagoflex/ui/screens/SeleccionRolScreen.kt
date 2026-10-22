@@ -105,13 +105,6 @@ fun SeleccionRolScreen(
         }
 
         Spacer(modifier = Modifier.height(Dimens.espacioGrande))
-
-        Text(
-            text = stringResource(R.string.proyecto_academico),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onBackground
-                .copy(alpha = 0.6f)
-        )
     }
 }
 

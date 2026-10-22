@@ -1,9 +1,12 @@
+
 package cl.duoc.pagoflex
 
-
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,20 +16,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
+
 import cl.duoc.pagoflex.ui.screens.SeleccionRolScreen
+import cl.duoc.pagoflex.ui.screens.usuario.InicioUsuarioScreen
 import cl.duoc.pagoflex.ui.theme.PagoFlexTheme
+import cl.duoc.pagoflex.viewmodel.InicioUsuarioViewModel
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
+            ),
+            navigationBarStyle = SystemBarStyle.light(
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
+            )
+        )
         super.onCreate(savedInstanceState)
 
-        setContent {
+        // ViewModel del usuario final
+        val inicioUsuarioViewModel =
+            ViewModelProvider(this)[InicioUsuarioViewModel::class.java]
 
-            // Tema principal de PagoFlex
+        setContent {
             PagoFlexTheme {
 
-                // Guarda temporalmente el rol seleccionado
                 var rolSeleccionado by rememberSaveable {
                     mutableStateOf("")
                 }
@@ -37,7 +55,6 @@ class MainActivity : ComponentActivity() {
 
                     if (rolSeleccionado.isEmpty()) {
 
-                        // Pantalla de selección de usuario
                         SeleccionRolScreen(
                             modifier = Modifier.padding(padding),
                             onSeleccionarRol = { rol ->
@@ -45,9 +62,21 @@ class MainActivity : ComponentActivity() {
                             }
                         )
 
+                    } else if (
+                        rolSeleccionado ==
+                        stringResource(R.string.rol_usuario)
+                    ) {
+
+                        InicioUsuarioScreen(
+                            viewModel = inicioUsuarioViewModel,
+                            modifier = Modifier.padding(padding),
+                            onVolver = {
+                                rolSeleccionado = ""
+                            }
+                        )
+
                     } else {
 
-                        // Pantalla temporal según el rol
                         PantallaTemporal(
                             rol = rolSeleccionado,
                             modifier = Modifier.padding(padding),
@@ -68,12 +97,10 @@ fun PantallaTemporal(
     modifier: Modifier = Modifier,
     onVolver: () -> Unit
 ) {
-
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(24.dp),
-
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -84,9 +111,7 @@ fun PantallaTemporal(
             color = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = stringResource(R.string.ingreso_rol, rol),
@@ -95,16 +120,10 @@ fun PantallaTemporal(
             textAlign = TextAlign.Center
         )
 
-        Spacer(
-            modifier = Modifier.height(24.dp)
-        )
+        Spacer(modifier = Modifier.height(24.dp))
 
-        OutlinedButton(
-            onClick = onVolver
-        ) {
-            Text(
-                text = stringResource(R.string.volver)
-            )
+        OutlinedButton(onClick = onVolver) {
+            Text(stringResource(R.string.volver))
         }
     }
 }

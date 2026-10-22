@@ -2,11 +2,13 @@
 package cl.duoc.pagoflex
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,12 +22,17 @@ import androidx.lifecycle.ViewModelProvider
 
 import cl.duoc.pagoflex.ui.screens.SeleccionRolScreen
 import cl.duoc.pagoflex.ui.screens.usuario.InicioUsuarioScreen
+import cl.duoc.pagoflex.ui.screens.usuario.DetalleCompromisoScreen
 import cl.duoc.pagoflex.ui.theme.PagoFlexTheme
 import cl.duoc.pagoflex.viewmodel.InicioUsuarioViewModel
 
 class MainActivity : ComponentActivity() {
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Iconos oscuros en las barras del sistema
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(
                 Color.TRANSPARENT,
@@ -36,7 +43,6 @@ class MainActivity : ComponentActivity() {
                 Color.TRANSPARENT
             )
         )
-        super.onCreate(savedInstanceState)
 
         // ViewModel del usuario final
         val inicioUsuarioViewModel =
@@ -49,12 +55,17 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf("")
                 }
 
+                var folioSeleccionado by rememberSaveable {
+                    mutableStateOf<String?>(null)
+                }
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
                 ) { padding ->
 
                     if (rolSeleccionado.isEmpty()) {
 
+                        // Pantalla principal de selección de roles
                         SeleccionRolScreen(
                             modifier = Modifier.padding(padding),
                             onSeleccionarRol = { rol ->
@@ -67,16 +78,42 @@ class MainActivity : ComponentActivity() {
                         stringResource(R.string.rol_usuario)
                     ) {
 
-                        InicioUsuarioScreen(
-                            viewModel = inicioUsuarioViewModel,
-                            modifier = Modifier.padding(padding),
-                            onVolver = {
-                                rolSeleccionado = ""
+                        // Buscar el compromiso seleccionado
+                        val compromisoSeleccionado =
+                            folioSeleccionado?.let { folio ->
+                                inicioUsuarioViewModel.obtenerCompromiso(folio)
                             }
-                        )
+
+                        if (compromisoSeleccionado != null) {
+
+                            // Pantalla de detalle
+                            DetalleCompromisoScreen(
+                                compromiso = compromisoSeleccionado,
+                                modifier = Modifier.padding(padding),
+                                onVolver = {
+                                    folioSeleccionado = null
+                                }
+                            )
+
+                        } else {
+
+                            // Pantalla de inicio del usuario
+                            InicioUsuarioScreen(
+                                viewModel = inicioUsuarioViewModel,
+                                modifier = Modifier.padding(padding),
+                                onVolver = {
+                                    folioSeleccionado = null
+                                    rolSeleccionado = ""
+                                },
+                                onSeleccionarCompromiso = { folio ->
+                                    folioSeleccionado = folio
+                                }
+                            )
+                        }
 
                     } else {
 
+                        // Pantalla temporal para agente y ejecutivo
                         PantallaTemporal(
                             rol = rolSeleccionado,
                             modifier = Modifier.padding(padding),

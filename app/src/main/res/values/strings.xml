@@ -64,4 +64,16 @@
     <string name="estado_revision">En revisión</string>
     <string name="estado_anulado">Anulado</string>
 
+
+    <!-- Detalle del compromiso -->
+    <string name="detalle_titulo">Detalle del compromiso</string>
+    <string name="detalle_folio">Folio</string>
+    <string name="detalle_empresa">Empresa</string>
+    <string name="detalle_concepto">Concepto</string>
+    <string name="detalle_monto">Monto original</string>
+    <string name="detalle_recargo">Recargo</string>
+    <string name="detalle_total">Total</string>
+    <string name="detalle_vencimiento">Fecha de vencimiento</string>
+    <string name="detalle_estado">Estado</string>
+
 </resources>

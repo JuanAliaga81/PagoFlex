@@ -1,6 +1,10 @@
 
 package cl.duoc.pagoflex.ui.screens.usuario
 
+
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -25,12 +29,17 @@ private fun formatoNumero(monto: Int): String {
     ).format(monto)
 }
 
+
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun InicioUsuarioScreen(
     viewModel: InicioUsuarioViewModel,
     modifier: Modifier = Modifier,
-    onVolver: () -> Unit
+    onVolver: () -> Unit,
+    onSeleccionarCompromiso: (String) -> Unit
 ) {
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -131,21 +140,31 @@ fun InicioUsuarioScreen(
         )
 
         // Muestra los compromisos almacenados en el ViewModel
+
         viewModel.compromisos.forEach { compromiso ->
 
-            TarjetaCompromiso(compromiso = compromiso)
+            TarjetaCompromiso(
+                compromiso = compromiso,
+                onClick = {
+                    onSeleccionarCompromiso(compromiso.folio)
+                }
+            )
 
             Spacer(
                 modifier = Modifier.height(Dimens.espacioMedio)
             )
         }
+
     }
 }
 
+
 @Composable
 fun TarjetaCompromiso(
-    compromiso: Compromiso
+    compromiso: Compromiso,
+    onClick: () -> Unit
 ) {
+
     // Texto correspondiente al estado
     val estadoTexto = when (compromiso.estado) {
         EstadoCompromiso.PENDIENTE ->
@@ -176,12 +195,14 @@ fun TarjetaCompromiso(
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = EstilosTarjeta.forma,
         colors = EstilosTarjeta.colores(),
         elevation = EstilosTarjeta.elevacion()
     ) {
-        Column(
+    Column(
             modifier = Modifier.padding(Dimens.espacioMedio)
         ) {
             Text(
@@ -225,3 +246,4 @@ fun TarjetaCompromiso(
         }
     }
 }
+

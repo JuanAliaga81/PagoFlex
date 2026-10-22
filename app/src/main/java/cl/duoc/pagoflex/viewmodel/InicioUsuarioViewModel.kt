@@ -75,4 +75,12 @@ class InicioUsuarioViewModel : ViewModel() {
                 }
                 ?.fechaVencimiento ?: ""
         }
+
+    fun obtenerCompromiso(folio: String): Compromiso? {
+        return compromisos.find {
+            it.folio == folio
+        }
+    }
+
 }
+

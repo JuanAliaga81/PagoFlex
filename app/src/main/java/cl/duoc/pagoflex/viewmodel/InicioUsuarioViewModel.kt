@@ -1,26 +1,26 @@
 
 package cl.duoc.pagoflex.viewmodel
 
-import cl.duoc.pagoflex.model.MotivoBloqueoPago
-import cl.duoc.pagoflex.model.ComprobantePago
-import java.util.UUID
-import java.util.Locale
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import cl.duoc.pagoflex.model.Compromiso
-import cl.duoc.pagoflex.model.EstadoCompromiso
-import cl.duoc.pagoflex.model.ReporteProblema
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
+import cl.duoc.pagoflex.model.Compromiso
+import cl.duoc.pagoflex.model.ComprobantePago
+import cl.duoc.pagoflex.model.EstadoCompromiso
+import cl.duoc.pagoflex.model.MotivoBloqueoPago
+import cl.duoc.pagoflex.model.ReporteProblema
+import cl.duoc.pagoflex.model.EstadoReporte
+
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.UUID
 
 class InicioUsuarioViewModel : ViewModel() {
 
-    // Datos ficticios para probar la aplicación
+    // Datos ficticios de los compromisos
     var compromisos by mutableStateOf(
         listOf(
             Compromiso(
@@ -51,14 +51,42 @@ class InicioUsuarioViewModel : ViewModel() {
     )
         private set
 
-    // Total de compromisos pendientes y vencidos
+    // Listas de pagos y reportes
+    var comprobantes by mutableStateOf(
+        listOf<ComprobantePago>()
+    )
+        private set
+
+    var reportes by mutableStateOf(
+        listOf<ReporteProblema>()
+    )
+        private set
+
+    // Convertir una fecha a milisegundos para compararla
+    private fun convertirFecha(fecha: String): Long {
+        val formato = SimpleDateFormat(
+            "dd-MM-yyyy",
+            Locale.forLanguageTag("es-CL")
+        )
+        formato.isLenient = false
+
+        return try {
+            formato.parse(fecha)?.time ?: Long.MAX_VALUE
+        } catch (e: java.text.ParseException) {
+            Long.MAX_VALUE
+        }
+    }
+
+    // Total pendiente y vencido
     val totalPorPagar: Int
         get() = compromisos
             .filter {
                 it.estado == EstadoCompromiso.PENDIENTE ||
                         it.estado == EstadoCompromiso.VENCIDO
             }
-            .sumOf { it.monto + it.recargo }
+            .sumOf {
+                it.monto + it.recargo
+            }
 
     // Cantidad de compromisos vencidos
     val cantidadVencidos: Int
@@ -66,37 +94,33 @@ class InicioUsuarioViewModel : ViewModel() {
             it.estado == EstadoCompromiso.VENCIDO
         }
 
-    // Fecha del próximo compromiso pendiente
+    // Próximo vencimiento pendiente
     val proximoVencimiento: String
-        @RequiresApi(Build.VERSION_CODES.O)
         get() {
-            val formato = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-
             return compromisos
                 .filter {
-                    it.estado == EstadoCompromiso.PENDIENTE
+                    it.estado == EstadoCompromiso.PENDIENTE &&
+                            convertirFecha(it.fechaVencimiento) != Long.MAX_VALUE
                 }
                 .minByOrNull {
-                    LocalDate.parse(it.fechaVencimiento, formato)
+                    convertirFecha(it.fechaVencimiento)
                 }
                 ?.fechaVencimiento ?: ""
         }
 
+    // Buscar compromiso por folio
     fun obtenerCompromiso(folio: String): Compromiso? {
         return compromisos.find {
             it.folio == folio
         }
     }
 
-
-    @RequiresApi(Build.VERSION_CODES.O)
+    // Validaciones antes de pagar
     fun validarPago(folio: String): MotivoBloqueoPago? {
 
-        // Buscar el compromiso
         val compromiso = obtenerCompromiso(folio)
             ?: return MotivoBloqueoPago.NO_ENCONTRADO
 
-        // Revisar el estado
         when (compromiso.estado) {
 
             EstadoCompromiso.PAGADO ->
@@ -111,14 +135,16 @@ class InicioUsuarioViewModel : ViewModel() {
             else -> {}
         }
 
-        // Revisar compromisos anteriores de la misma empresa
-        val formato = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-
-        val fechaActual = LocalDate.parse(
-            compromiso.fechaVencimiento,
-            formato
+        val fechaActual = convertirFecha(
+            compromiso.fechaVencimiento
         )
 
+        // No continuar si la fecha no es válida
+        if (fechaActual == Long.MAX_VALUE) {
+            return MotivoBloqueoPago.NO_ENCONTRADO
+        }
+
+        // Verificar compromisos anteriores de la misma empresa
         val existeAnterior = compromisos.any { otro ->
 
             val estadoSinResolver =
@@ -129,31 +155,19 @@ class InicioUsuarioViewModel : ViewModel() {
             otro.folio != compromiso.folio &&
                     otro.empresa == compromiso.empresa &&
                     estadoSinResolver &&
-                    LocalDate.parse(
-                        otro.fechaVencimiento,
-                        formato
-                    ).isBefore(fechaActual)
+                    convertirFecha(otro.fechaVencimiento) < fechaActual
         }
 
         if (existeAnterior) {
             return MotivoBloqueoPago.COMPROMISO_ANTERIOR
         }
 
-        // Sin bloqueos: puede continuar al pago simulado
         return null
     }
 
-
-    // Comprobantes generados durante la sesión
-    var comprobantes by mutableStateOf(
-        listOf<ComprobantePago>()
-    )
-        private set
-
-    @RequiresApi(Build.VERSION_CODES.O)
+    // Registrar pago simulado
     fun simularPago(folio: String): ComprobantePago? {
 
-        // Validar nuevamente antes de registrar
         if (validarPago(folio) != null) {
             return null
         }
@@ -161,7 +175,11 @@ class InicioUsuarioViewModel : ViewModel() {
         val compromiso = obtenerCompromiso(folio)
             ?: return null
 
-        // Crear el comprobante
+        val formato = SimpleDateFormat(
+            "dd-MM-yyyy",
+            Locale.forLanguageTag("es-CL")
+        )
+
         val comprobante = ComprobantePago(
             codigo = "SIM-" + UUID.randomUUID()
                 .toString()
@@ -171,15 +189,13 @@ class InicioUsuarioViewModel : ViewModel() {
             empresa = compromiso.empresa,
             concepto = compromiso.concepto,
             montoTotal = compromiso.monto + compromiso.recargo,
-            fechaPago = LocalDate.now().format(
-                DateTimeFormatter.ofPattern("dd-MM-yyyy")
-            )
+            fechaPago = formato.format(Date())
         )
 
-        // Guardar comprobante
+        // Guardar el comprobante
         comprobantes = comprobantes + comprobante
 
-        // Actualizar el compromiso a PAGADO
+        // Actualizar el compromiso a Pagado
         compromisos = compromisos.map { actual ->
 
             if (actual.folio == folio) {
@@ -194,29 +210,23 @@ class InicioUsuarioViewModel : ViewModel() {
         return comprobante
     }
 
-
-    // Reportes registrados durante la sesión
-    var reportes by mutableStateOf(
-        listOf<ReporteProblema>()
-    )
-        private set
-
+    // Registrar reporte del usuario
     fun registrarReporte(
         folio: String,
         motivo: String,
         descripcion: String
     ): Boolean {
 
-        // Validar los datos del formulario
-        if (motivo.isBlank() || descripcion.trim().length < 10) {
+        if (
+            motivo.isBlank() ||
+            descripcion.trim().length < 10
+        ) {
             return false
         }
 
-        // Buscar el compromiso
         val compromiso = obtenerCompromiso(folio)
             ?: return false
 
-        // No permitir reportes duplicados o anulados
         if (
             compromiso.estado == EstadoCompromiso.EN_REVISION ||
             compromiso.estado == EstadoCompromiso.ANULADO
@@ -224,7 +234,6 @@ class InicioUsuarioViewModel : ViewModel() {
             return false
         }
 
-        // Crear el reporte
         val reporte = ReporteProblema(
             codigo = "REP-" + UUID.randomUUID()
                 .toString()
@@ -236,10 +245,9 @@ class InicioUsuarioViewModel : ViewModel() {
             estadoAnterior = compromiso.estado
         )
 
-        // Guardar el reporte
         reportes = reportes + reporte
 
-        // Cambiar el compromiso a En revisión
+        // El compromiso queda En revisión
         compromisos = compromisos.map { actual ->
 
             if (actual.folio == folio) {
@@ -253,5 +261,108 @@ class InicioUsuarioViewModel : ViewModel() {
 
         return true
     }
-}
 
+    // AGENTE: Marcar reporte como En proceso
+    fun iniciarGestionReporte(codigo: String): Boolean {
+
+        val reporte = reportes.find {
+            it.codigo == codigo
+        } ?: return false
+
+        if (reporte.estado != EstadoReporte.PENDIENTE) {
+            return false
+        }
+
+        reportes = reportes.map { actual ->
+
+            if (actual.codigo == codigo) {
+                actual.copy(
+                    estado = EstadoReporte.EN_PROCESO
+                )
+            } else {
+                actual
+            }
+        }
+
+        return true
+    }
+
+    // AGENTE: Guardar respuesta
+    fun responderReporte(
+        codigo: String,
+        respuesta: String
+    ): Boolean {
+
+        val texto = respuesta.trim()
+
+        if (texto.length < 10) {
+            return false
+        }
+
+        val reporte = reportes.find {
+            it.codigo == codigo
+        } ?: return false
+
+        if (reporte.estado != EstadoReporte.EN_PROCESO) {
+            return false
+        }
+
+        reportes = reportes.map { actual ->
+
+            if (actual.codigo == codigo) {
+                actual.copy(
+                    respuesta = texto
+                )
+            } else {
+                actual
+            }
+        }
+
+        return true
+    }
+
+    // AGENTE: Resolver el reporte
+    fun resolverReporte(codigo: String): Boolean {
+
+        val reporte = reportes.find {
+            it.codigo == codigo
+        } ?: return false
+
+        // Verificar estado y respuesta
+        if (
+            reporte.estado != EstadoReporte.EN_PROCESO ||
+            reporte.respuesta.trim().length < 10
+        ) {
+            return false
+        }
+
+        // Actualizar el reporte
+        reportes = reportes.map { actual ->
+
+            if (actual.codigo == codigo) {
+                actual.copy(
+                    estado = EstadoReporte.RESUELTO
+                )
+            } else {
+                actual
+            }
+        }
+
+        // Restaurar el estado anterior del compromiso
+        compromisos = compromisos.map { compromiso ->
+
+            if (
+                compromiso.folio == reporte.folioCompromiso &&
+                compromiso.estado == EstadoCompromiso.EN_REVISION
+            ) {
+                compromiso.copy(
+                    estado = reporte.estadoAnterior
+                )
+            } else {
+                compromiso
+            }
+        }
+
+        return true
+    }
+}

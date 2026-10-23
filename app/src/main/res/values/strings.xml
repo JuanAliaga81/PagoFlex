@@ -139,4 +139,30 @@
     <string name="reporte_en_revision">Este compromiso ya está en revisión.</string>
     <string name="reporte_exito">Reporte registrado correctamente.</string>
 
+
+    <!-- Agente PagoFlex -->
+    <string name="agente_titulo">Panel del agente</string>
+    <string name="agente_subtitulo">Reportes de los usuarios</string>
+    <string name="agente_total">Total de reportes: %1$d</string>
+    <string name="agente_sin_reportes">No hay reportes registrados.</string>
+    <string name="agente_codigo">Código: %1$s</string>
+    <string name="agente_folio">Compromiso: %1$s</string>
+    <string name="agente_motivo">Motivo: %1$s</string>
+    <string name="agente_descripcion">Descripción del problema</string>
+    <string name="agente_pendiente">Pendiente de atención</string>
+
+
+    <!-- Gestion de reportes del agente -->
+    <string name="agente_en_proceso">En proceso</string>
+    <string name="agente_resuelto">Resuelto</string>
+    <string name="agente_iniciar">Marcar en proceso</string>
+    <string name="agente_responder">Respuesta del agente</string>
+    <string name="agente_respuesta_ayuda">Escribe al menos 10 caracteres.</string>
+    <string name="agente_error_respuesta">La respuesta debe tener al menos 10 caracteres.</string>
+    <string name="agente_guardar_respuesta">Guardar respuesta</string>
+    <string name="agente_respuesta_guardada">Respuesta guardada correctamente.</string>
+    <string name="agente_resolver">Resolver reporte</string>
+    <string name="agente_respuesta_final">Respuesta registrada</string>
+    <string name="agente_guardar_primero">Guarda la respuesta antes de resolver.</string>
+
 </resources>

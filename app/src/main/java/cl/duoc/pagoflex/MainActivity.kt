@@ -1,9 +1,6 @@
 
 package cl.duoc.pagoflex
 
-
-import cl.duoc.pagoflex.ui.screens.usuario.ReportarProblemaScreen
-import cl.duoc.pagoflex.ui.screens.usuario.HistorialPagosScreen
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -26,6 +23,9 @@ import androidx.lifecycle.ViewModelProvider
 import cl.duoc.pagoflex.ui.screens.SeleccionRolScreen
 import cl.duoc.pagoflex.ui.screens.usuario.InicioUsuarioScreen
 import cl.duoc.pagoflex.ui.screens.usuario.DetalleCompromisoScreen
+import cl.duoc.pagoflex.ui.screens.usuario.HistorialPagosScreen
+import cl.duoc.pagoflex.ui.screens.usuario.ReportarProblemaScreen
+import cl.duoc.pagoflex.ui.screens.agente.InicioAgenteScreen
 import cl.duoc.pagoflex.ui.theme.PagoFlexTheme
 import cl.duoc.pagoflex.viewmodel.InicioUsuarioViewModel
 
@@ -47,22 +47,24 @@ class MainActivity : ComponentActivity() {
             )
         )
 
-        // ViewModel del usuario final
+        // ViewModel compartido durante esta etapa
         val inicioUsuarioViewModel =
             ViewModelProvider(this)[InicioUsuarioViewModel::class.java]
 
         setContent {
             PagoFlexTheme {
 
+                // Rol seleccionado
                 var rolSeleccionado by rememberSaveable {
                     mutableStateOf("")
                 }
 
+                // Compromiso seleccionado
                 var folioSeleccionado by rememberSaveable {
                     mutableStateOf<String?>(null)
                 }
 
-
+                // Navegación del usuario final
                 var mostrarHistorial by rememberSaveable {
                     mutableStateOf(false)
                 }
@@ -77,7 +79,7 @@ class MainActivity : ComponentActivity() {
 
                     if (rolSeleccionado.isEmpty()) {
 
-                        // Pantalla principal de selección de roles
+                        // Selección de roles
                         SeleccionRolScreen(
                             modifier = Modifier.padding(padding),
                             onSeleccionarRol = { rol ->
@@ -90,17 +92,18 @@ class MainActivity : ComponentActivity() {
                         stringResource(R.string.rol_usuario)
                     ) {
 
-
-
-
+                        // Buscar compromiso seleccionado
                         val compromisoSeleccionado =
                             folioSeleccionado?.let { folio ->
                                 inicioUsuarioViewModel.obtenerCompromiso(folio)
                             }
 
-// Formulario de reporte
-                        if (mostrarReporte && compromisoSeleccionado != null) {
+                        if (
+                            mostrarReporte &&
+                            compromisoSeleccionado != null
+                        ) {
 
+                            // Formulario de reporte
                             ReportarProblemaScreen(
                                 compromiso = compromisoSeleccionado,
                                 modifier = Modifier.padding(padding),
@@ -116,14 +119,17 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
 
-                        } else if (compromisoSeleccionado != null) {
+                        } else if (
+                            compromisoSeleccionado != null
+                        ) {
 
                             // Detalle del compromiso
                             DetalleCompromisoScreen(
                                 compromiso = compromisoSeleccionado,
-                                motivoBloqueo = inicioUsuarioViewModel.validarPago(
-                                    compromisoSeleccionado.folio
-                                ),
+                                motivoBloqueo =
+                                    inicioUsuarioViewModel.validarPago(
+                                        compromisoSeleccionado.folio
+                                    ),
                                 modifier = Modifier.padding(padding),
                                 onVolver = {
                                     folioSeleccionado = null
@@ -141,7 +147,8 @@ class MainActivity : ComponentActivity() {
 
                             // Historial de pagos
                             HistorialPagosScreen(
-                                comprobantes = inicioUsuarioViewModel.comprobantes,
+                                comprobantes =
+                                    inicioUsuarioViewModel.comprobantes,
                                 modifier = Modifier.padding(padding),
                                 onVolver = {
                                     mostrarHistorial = false
@@ -162,25 +169,68 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onSeleccionarCompromiso = { folio ->
                                     folioSeleccionado = folio
+                                    mostrarHistorial = false
                                 },
                                 onVerHistorial = {
+                                    folioSeleccionado = null
                                     mostrarHistorial = true
                                 }
                             )
                         }
 
+                    } else if (
+                        rolSeleccionado ==
+                        stringResource(R.string.rol_agente)
+                    ) {
+
+                        // Panel del Agente PagoFlex
+
+                        InicioAgenteScreen(
+                            reportes = inicioUsuarioViewModel.reportes,
+                            modifier = Modifier.padding(padding),
+                            onVolver = {
+                                rolSeleccionado = ""
+                            },
+                            onIniciarGestion = { codigo ->
+                                inicioUsuarioViewModel.iniciarGestionReporte(codigo)
+                            },
+                            onResponderReporte = { codigo, respuesta ->
+                                inicioUsuarioViewModel.responderReporte(
+                                    codigo,
+                                    respuesta
+                                )
+                            },
+                            onResolverReporte = { codigo ->
+                                inicioUsuarioViewModel.resolverReporte(codigo)
+                            }
+                        )
+
+
+                    } else {
+
+                        // Pantalla temporal del Ejecutivo
+                        PantallaTemporal(
+                            rol = rolSeleccionado,
+                            modifier = Modifier.padding(padding),
+                            onVolver = {
+                                rolSeleccionado = ""
+                            }
+                        )
                     }
+                }
             }
         }
     }
 }
 
+// Pantalla temporal para el Ejecutivo
 @Composable
 fun PantallaTemporal(
     rol: String,
     modifier: Modifier = Modifier,
     onVolver: () -> Unit
 ) {
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -195,20 +245,26 @@ fun PantallaTemporal(
             color = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         Text(
-            text = stringResource(R.string.ingreso_rol, rol),
+            text = stringResource(
+                R.string.ingreso_rol,
+                rol
+            ),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
 
         OutlinedButton(onClick = onVolver) {
             Text(stringResource(R.string.volver))
         }
     }
-}
 }

@@ -1,6 +1,8 @@
 
 package cl.duoc.pagoflex
 
+
+import cl.duoc.pagoflex.ui.screens.usuario.ReportarProblemaScreen
 import cl.duoc.pagoflex.ui.screens.usuario.HistorialPagosScreen
 import android.graphics.Color
 import android.os.Build
@@ -65,6 +67,9 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf(false)
                 }
 
+                var mostrarReporte by rememberSaveable {
+                    mutableStateOf(false)
+                }
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
@@ -86,12 +91,32 @@ class MainActivity : ComponentActivity() {
                     ) {
 
 
+
+
                         val compromisoSeleccionado =
                             folioSeleccionado?.let { folio ->
                                 inicioUsuarioViewModel.obtenerCompromiso(folio)
                             }
 
-                        if (compromisoSeleccionado != null) {
+// Formulario de reporte
+                        if (mostrarReporte && compromisoSeleccionado != null) {
+
+                            ReportarProblemaScreen(
+                                compromiso = compromisoSeleccionado,
+                                modifier = Modifier.padding(padding),
+                                onVolver = {
+                                    mostrarReporte = false
+                                },
+                                onEnviarReporte = { motivo, descripcion ->
+                                    inicioUsuarioViewModel.registrarReporte(
+                                        compromisoSeleccionado.folio,
+                                        motivo,
+                                        descripcion
+                                    )
+                                }
+                            )
+
+                        } else if (compromisoSeleccionado != null) {
 
                             // Detalle del compromiso
                             DetalleCompromisoScreen(
@@ -102,9 +127,13 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.padding(padding),
                                 onVolver = {
                                     folioSeleccionado = null
+                                    mostrarReporte = false
                                 },
                                 onConfirmarPago = { folio ->
                                     inicioUsuarioViewModel.simularPago(folio)
+                                },
+                                onReportarProblema = {
+                                    mostrarReporte = true
                                 }
                             )
 
@@ -128,6 +157,7 @@ class MainActivity : ComponentActivity() {
                                 onVolver = {
                                     folioSeleccionado = null
                                     mostrarHistorial = false
+                                    mostrarReporte = false
                                     rolSeleccionado = ""
                                 },
                                 onSeleccionarCompromiso = { folio ->
@@ -139,19 +169,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-
-                    } else {
-
-                        // Pantalla temporal para agente y ejecutivo
-                        PantallaTemporal(
-                            rol = rolSeleccionado,
-                            modifier = Modifier.padding(padding),
-                            onVolver = {
-                                rolSeleccionado = ""
-                            }
-                        )
                     }
-                }
             }
         }
     }
@@ -192,4 +210,5 @@ fun PantallaTemporal(
             Text(stringResource(R.string.volver))
         }
     }
+}
 }

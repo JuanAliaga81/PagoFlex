@@ -123,4 +123,20 @@
     <string name="comprobante_concepto">Concepto: %1$s</string>
 
 
+    <!-- Formulario de reporte -->
+    <string name="reporte_boton">Reportar problema</string>
+    <string name="reporte_titulo">Reportar un problema</string>
+    <string name="reporte_motivo">Selecciona el motivo</string>
+    <string name="reporte_motivo_monto">Monto incorrecto</string>
+    <string name="reporte_motivo_pago">Problema con un pago</string>
+    <string name="reporte_motivo_otro">Otro problema</string>
+    <string name="reporte_descripcion">Describe el problema</string>
+    <string name="reporte_descripcion_ayuda">Escribe al menos 10 caracteres</string>
+    <string name="reporte_error_motivo">Debes seleccionar un motivo.</string>
+    <string name="reporte_error_descripcion">La descripción debe tener al menos 10 caracteres.</string>
+    <string name="reporte_guardar">Enviar reporte</string>
+    <string name="reporte_error_guardar">No se pudo registrar el reporte.</string>
+    <string name="reporte_en_revision">Este compromiso ya está en revisión.</string>
+    <string name="reporte_exito">Reporte registrado correctamente.</string>
+
 </resources>

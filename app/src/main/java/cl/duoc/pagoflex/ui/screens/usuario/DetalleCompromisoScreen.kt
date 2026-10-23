@@ -25,14 +25,17 @@ import cl.duoc.pagoflex.ui.theme.Dimens
 import java.text.NumberFormat
 import java.util.Locale
 
+
 @Composable
 fun DetalleCompromisoScreen(
     compromiso: Compromiso,
     motivoBloqueo: MotivoBloqueoPago?,
     modifier: Modifier = Modifier,
     onVolver: () -> Unit,
-    onConfirmarPago: (String) -> ComprobantePago?
+    onConfirmarPago: (String) -> ComprobantePago?,
+    onReportarProblema: () -> Unit
 ) {
+
 
     // Formato de montos en pesos chilenos
     val formato = NumberFormat.getIntegerInstance(
@@ -214,6 +217,23 @@ fun DetalleCompromisoScreen(
                 text = stringResource(R.string.pagar_compromiso)
             )
         }
+
+
+        Spacer(
+            modifier = Modifier.height(Dimens.espacioMedio)
+        )
+
+        OutlinedButton(
+            onClick = onReportarProblema,
+            enabled = compromiso.estado != EstadoCompromiso.EN_REVISION &&
+                    compromiso.estado != EstadoCompromiso.ANULADO,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(R.string.reporte_boton)
+            )
+        }
+
 
         // Explicar por qué el botón está deshabilitado
         if (mensajeBloqueo != null) {

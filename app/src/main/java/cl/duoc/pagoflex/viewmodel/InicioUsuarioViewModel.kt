@@ -13,8 +13,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import cl.duoc.pagoflex.model.Compromiso
 import cl.duoc.pagoflex.model.EstadoCompromiso
+import cl.duoc.pagoflex.model.ReporteProblema
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+
 
 class InicioUsuarioViewModel : ViewModel() {
 
@@ -192,5 +194,64 @@ class InicioUsuarioViewModel : ViewModel() {
         return comprobante
     }
 
+
+    // Reportes registrados durante la sesión
+    var reportes by mutableStateOf(
+        listOf<ReporteProblema>()
+    )
+        private set
+
+    fun registrarReporte(
+        folio: String,
+        motivo: String,
+        descripcion: String
+    ): Boolean {
+
+        // Validar los datos del formulario
+        if (motivo.isBlank() || descripcion.trim().length < 10) {
+            return false
+        }
+
+        // Buscar el compromiso
+        val compromiso = obtenerCompromiso(folio)
+            ?: return false
+
+        // No permitir reportes duplicados o anulados
+        if (
+            compromiso.estado == EstadoCompromiso.EN_REVISION ||
+            compromiso.estado == EstadoCompromiso.ANULADO
+        ) {
+            return false
+        }
+
+        // Crear el reporte
+        val reporte = ReporteProblema(
+            codigo = "REP-" + UUID.randomUUID()
+                .toString()
+                .take(8)
+                .uppercase(Locale.ROOT),
+            folioCompromiso = folio,
+            motivo = motivo,
+            descripcion = descripcion.trim(),
+            estadoAnterior = compromiso.estado
+        )
+
+        // Guardar el reporte
+        reportes = reportes + reporte
+
+        // Cambiar el compromiso a En revisión
+        compromisos = compromisos.map { actual ->
+
+            if (actual.folio == folio) {
+                actual.copy(
+                    estado = EstadoCompromiso.EN_REVISION
+                )
+            } else {
+                actual
+            }
+        }
+
+        return true
+    }
 }
 

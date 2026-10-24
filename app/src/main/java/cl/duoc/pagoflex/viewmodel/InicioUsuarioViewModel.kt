@@ -62,6 +62,12 @@ class InicioUsuarioViewModel : ViewModel() {
     )
         private set
 
+    // Motivos de anulación registrados durante la sesión
+    var motivosAnulacion by mutableStateOf(
+        mapOf<String, String>()
+    )
+        private set
+
     // Convertir una fecha a milisegundos para compararla
     private fun convertirFecha(fecha: String): Long {
         val formato = SimpleDateFormat(
@@ -360,6 +366,112 @@ class InicioUsuarioViewModel : ViewModel() {
                 )
             } else {
                 compromiso
+            }
+        }
+
+        return true
+    }
+
+    // EJECUTIVO: Registrar un nuevo compromiso
+    fun registrarCompromiso(
+        empresa: String,
+        concepto: String,
+        monto: Int,
+        fechaVencimiento: String
+    ): Boolean {
+
+        if (empresa.isBlank() || concepto.trim().length < 3 || monto <= 0) {
+            return false
+        }
+
+        val fechaTexto = fechaVencimiento.trim()
+
+        if (!Regex("""\d{2}-\d{2}-\d{4}""").matches(fechaTexto)) {
+            return false
+        }
+
+        val formato = SimpleDateFormat(
+            "dd-MM-yyyy",
+            Locale.forLanguageTag("es-CL")
+        )
+        formato.isLenient = false
+
+        val fecha = try {
+            formato.parse(fechaTexto)
+        } catch (e: java.text.ParseException) {
+            null
+        } ?: return false
+
+        // La fecha no puede ser anterior a hoy
+        val hoy = formato.parse(formato.format(Date())) ?: return false
+
+        if (fecha.before(hoy)) {
+            return false
+        }
+
+        // Generar el siguiente folio
+        val ultimoNumero = compromisos.mapNotNull {
+            if (it.folio.startsWith("CP-")) {
+                it.folio.removePrefix("CP-").toIntOrNull()
+            } else {
+                null
+            }
+        }.maxOrNull() ?: 0
+
+        val nuevoFolio = "CP-" +
+                (ultimoNumero + 1).toString().padStart(3, '0')
+
+        val nuevoCompromiso = Compromiso(
+            folio = nuevoFolio,
+            empresa = empresa,
+            concepto = concepto.trim(),
+            monto = monto,
+            fechaVencimiento = fechaTexto,
+            estado = EstadoCompromiso.PENDIENTE
+        )
+
+        compromisos = compromisos + nuevoCompromiso
+
+        return true
+    }
+
+
+    // EJECUTIVO: Anular un compromiso
+    fun anularCompromiso(
+        folio: String,
+        motivo: String
+    ): Boolean {
+
+        val texto = motivo.trim()
+
+        // El motivo debe tener al menos 10 caracteres
+        if (texto.length < 10) {
+            return false
+        }
+
+        val compromiso = obtenerCompromiso(folio)
+            ?: return false
+
+        // Solamente se pueden anular pendientes o vencidos
+        if (
+            compromiso.estado != EstadoCompromiso.PENDIENTE &&
+            compromiso.estado != EstadoCompromiso.VENCIDO
+        ) {
+            return false
+        }
+
+        // Guardar el motivo de anulación
+        motivosAnulacion = motivosAnulacion + (folio to texto)
+
+        // Cambiar el estado del compromiso
+        compromisos = compromisos.map { actual ->
+
+            if (actual.folio == folio) {
+                actual.copy(
+                    estado = EstadoCompromiso.ANULADO
+                )
+            } else {
+                actual
             }
         }
 

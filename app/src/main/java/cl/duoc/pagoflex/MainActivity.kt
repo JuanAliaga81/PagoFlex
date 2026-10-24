@@ -138,13 +138,16 @@ class MainActivity : ComponentActivity() {
                                         mostrarReporte = false
                                     },
 
-                                    onEnviarReporte = { motivo, descripcion ->
+
+                                    onEnviarReporte = { motivo, descripcion, archivoEvidencia ->
                                         inicioUsuarioViewModel.registrarReporte(
                                             compromisoSeleccionado.folio,
                                             motivo,
-                                            descripcion
+                                            descripcion,
+                                            archivoEvidencia
                                         )
                                     }
+
                                 )
 
                                 // Detalle del compromiso

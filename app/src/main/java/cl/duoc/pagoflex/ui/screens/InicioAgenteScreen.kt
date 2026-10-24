@@ -1,6 +1,7 @@
 
 package cl.duoc.pagoflex.ui.screens.agente
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,13 +10,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 
 import cl.duoc.pagoflex.R
 import cl.duoc.pagoflex.model.EstadoReporte
 import cl.duoc.pagoflex.model.ReporteProblema
 import cl.duoc.pagoflex.ui.styles.EstilosTarjeta
 import cl.duoc.pagoflex.ui.theme.Dimens
+import cl.duoc.pagoflex.util.cargarEvidencia
 
 @Composable
 fun InicioAgenteScreen(
@@ -129,6 +135,18 @@ fun TarjetaReporte(
         mutableStateOf(false)
     }
 
+    // Recuperar la fotografía adjunta al reporte
+    val context = LocalContext.current
+
+    val imagenEvidencia = remember(
+        context,
+        reporte.archivoEvidencia
+    ) {
+        reporte.archivoEvidencia?.let { nombreArchivo ->
+            cargarEvidencia(context, nombreArchivo)
+        }
+    }
+
     // Texto del estado actual
     val estadoTexto = when (reporte.estado) {
 
@@ -194,6 +212,47 @@ fun TarjetaReporte(
                 style = MaterialTheme.typography.bodyMedium
             )
 
+            // Mostrar la evidencia fotográfica si existe
+            if (reporte.archivoEvidencia != null) {
+
+                Spacer(
+                    modifier = Modifier.height(Dimens.espacioMedio)
+                )
+
+                Text(
+                    text = stringResource(R.string.agente_evidencia),
+                    style = MaterialTheme.typography.titleSmall
+                )
+
+                Spacer(
+                    modifier = Modifier.height(Dimens.espacioChico)
+                )
+
+                if (imagenEvidencia != null) {
+
+                    Image(
+                        bitmap = imagenEvidencia.asImageBitmap(),
+                        contentDescription = stringResource(
+                            R.string.reporte_vista_previa
+                        ),
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                    )
+
+                } else {
+
+                    Text(
+                        text = stringResource(
+                            R.string.agente_evidencia_no_disponible
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+
             Spacer(
                 modifier = Modifier.height(Dimens.espacioMedio)
             )
@@ -231,6 +290,7 @@ fun TarjetaReporte(
                     OutlinedTextField(
                         value = respuestaTexto,
                         onValueChange = { texto ->
+
                             if (texto.length <= 500) {
                                 respuestaTexto = texto
                                 errorRespuesta = false

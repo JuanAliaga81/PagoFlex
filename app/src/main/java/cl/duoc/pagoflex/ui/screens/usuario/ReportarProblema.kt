@@ -1,37 +1,93 @@
 
 package cl.duoc.pagoflex.ui.screens.usuario
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 
-import androidx.compose.ui.res.painterResource
-
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 
 import cl.duoc.pagoflex.R
 import cl.duoc.pagoflex.model.Compromiso
 import cl.duoc.pagoflex.ui.theme.Dimens
+import cl.duoc.pagoflex.util.guardarEvidencia
+
+// Cargar una imagen de la galería en tamaño reducido
+private fun cargarImagenGaleria(
+    context: Context,
+    uri: Uri
+): Bitmap? {
+
+    return try {
+
+        val opciones = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+
+        context.contentResolver.openInputStream(uri)?.use {
+            BitmapFactory.decodeStream(it, null, opciones)
+        }
+
+        var escala = 1
+
+        while (
+            opciones.outWidth / escala > 1200 ||
+            opciones.outHeight / escala > 1200
+        ) {
+            escala *= 2
+        }
+
+        val opcionesImagen = BitmapFactory.Options().apply {
+            inSampleSize = escala
+        }
+
+        context.contentResolver.openInputStream(uri)?.use {
+            BitmapFactory.decodeStream(
+                it,
+                null,
+                opcionesImagen
+            )
+        }
+
+    } catch (e: Exception) {
+        null
+    }
+}
 
 @Composable
 fun ReportarProblemaScreen(
     compromiso: Compromiso,
     modifier: Modifier = Modifier,
     onVolver: () -> Unit,
-    onEnviarReporte: (String, String) -> Boolean
+    onEnviarReporte: (String, String, String?) -> Boolean
 ) {
 
     var reporteEnviado by rememberSaveable {
         mutableStateOf(false)
     }
-
 
     var motivo by rememberSaveable {
         mutableStateOf("")
@@ -47,6 +103,55 @@ fun ReportarProblemaScreen(
 
     var errorGuardar by remember {
         mutableStateOf(false)
+    }
+
+    // Fotografía seleccionada por el usuario
+    var imagenSeleccionada by remember {
+        mutableStateOf<Bitmap?>(null)
+    }
+
+    var errorImagen by remember {
+        mutableStateOf(false)
+    }
+
+    var errorGuardarImagen by remember {
+        mutableStateOf(false)
+    }
+
+    val context = LocalContext.current
+
+    // Abrir la cámara
+    val abrirCamara = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { fotografia ->
+
+        if (fotografia != null) {
+            imagenSeleccionada = fotografia
+            errorImagen = false
+            errorGuardarImagen = false
+        }
+    }
+
+    // Abrir la galería
+    val abrirGaleria = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+
+        if (uri != null) {
+
+            val imagen = cargarImagenGaleria(
+                context,
+                uri
+            )
+
+            if (imagen != null) {
+                imagenSeleccionada = imagen
+                errorImagen = false
+                errorGuardarImagen = false
+            } else {
+                errorImagen = true
+            }
+        }
     }
 
     val motivos = listOf(
@@ -100,7 +205,7 @@ fun ReportarProblemaScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Seleccionar el motivo del problema
+        // Motivo del problema
         Text(
             text = stringResource(R.string.reporte_motivo),
             style = MaterialTheme.typography.titleMedium
@@ -136,9 +241,11 @@ fun ReportarProblemaScreen(
         }
 
         if (errorMotivo) {
+
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 Icon(
                     painter = painterResource(
                         id = android.R.drawable.ic_dialog_alert
@@ -146,10 +253,15 @@ fun ReportarProblemaScreen(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.error
                 )
-                Spacer(modifier = Modifier.width(Dimens.espacioChico))
+
+                Spacer(
+                    modifier = Modifier.width(Dimens.espacioChico)
+                )
 
                 Text(
-                    text = stringResource(R.string.reporte_error_motivo),
+                    text = stringResource(
+                        R.string.reporte_error_motivo
+                    ),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -160,32 +272,42 @@ fun ReportarProblemaScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Campo de descripción
+        // Descripción del problema
         OutlinedTextField(
             value = descripcion,
             onValueChange = { nuevoTexto ->
+
                 if (nuevoTexto.length <= 250) {
                     descripcion = nuevoTexto
                 }
             },
             label = {
-                Text(stringResource(R.string.reporte_descripcion))
+                Text(
+                    stringResource(R.string.reporte_descripcion)
+                )
             },
             modifier = Modifier.fillMaxWidth(),
             minLines = 3,
             maxLines = 5,
             isError = errorDescripcion,
             supportingText = {
+
                 Text(
                     if (errorDescripcion) {
-                        stringResource(R.string.reporte_error_descripcion)
+                        stringResource(
+                            R.string.reporte_error_descripcion
+                        )
                     } else {
-                        stringResource(R.string.reporte_descripcion_ayuda)
+                        stringResource(
+                            R.string.reporte_descripcion_ayuda
+                        )
                     }
                 )
             },
             trailingIcon = {
+
                 if (errorDescripcion) {
+
                     Icon(
                         painter = painterResource(
                             id = android.R.drawable.ic_dialog_alert
@@ -193,7 +315,6 @@ fun ReportarProblemaScreen(
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error
                     )
-
                 }
             }
         )
@@ -202,35 +323,175 @@ fun ReportarProblemaScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Enviar el formulario
+        // Recursos nativos: cámara y galería
+        Text(
+            text = stringResource(R.string.reporte_evidencia),
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(
+            modifier = Modifier.height(Dimens.espacioMedio)
+        )
+
+        OutlinedButton(
+            onClick = {
+                abrirCamara.launch(null)
+            },
+            enabled = !reporteEnviado,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(R.string.reporte_tomar_foto)
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(Dimens.espacioChico)
+        )
+
+        OutlinedButton(
+            onClick = {
+                abrirGaleria.launch(
+                    PickVisualMediaRequest(
+                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                    )
+                )
+            },
+            enabled = !reporteEnviado,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(R.string.reporte_abrir_galeria)
+            )
+        }
+
+        // Vista previa de la fotografía
+        imagenSeleccionada?.let { fotografia ->
+
+            Spacer(
+                modifier = Modifier.height(Dimens.espacioMedio)
+            )
+
+            Image(
+                bitmap = fotografia.asImageBitmap(),
+                contentDescription = stringResource(
+                    R.string.reporte_vista_previa
+                ),
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+
+            Spacer(
+                modifier = Modifier.height(Dimens.espacioChico)
+            )
+
+            OutlinedButton(
+                onClick = {
+                    imagenSeleccionada = null
+                    errorImagen = false
+                    errorGuardarImagen = false
+                },
+                enabled = !reporteEnviado,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.reporte_quitar_foto)
+                )
+            }
+        }
+
+        if (errorImagen) {
+
+            Spacer(
+                modifier = Modifier.height(Dimens.espacioChico)
+            )
+
+            Text(
+                text = stringResource(R.string.reporte_error_imagen),
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
+        if (errorGuardarImagen) {
+
+            Spacer(
+                modifier = Modifier.height(Dimens.espacioChico)
+            )
+
+            Text(
+                text = stringResource(
+                    R.string.reporte_error_guardar_imagen
+                ),
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(Dimens.espacioGrande)
+        )
+
+        // Enviar reporte y guardar evidencia
         Button(
             onClick = {
 
                 intentoEnviar = true
                 errorGuardar = false
+                errorGuardarImagen = false
 
-                if (motivo.isNotEmpty() &&
+                if (
+                    motivo.isNotEmpty() &&
                     descripcion.trim().length >= 10
                 ) {
-                    val registrado = onEnviarReporte(
-                        motivo,
-                        descripcion.trim()
-                    )
 
+                    val fotografia = imagenSeleccionada
 
-                    if (registrado) {
-                        reporteEnviado = true
+                    // Guardar la fotografía si existe
+                    val nombreArchivo = if (fotografia != null) {
+                        guardarEvidencia(context, fotografia)
                     } else {
-                        errorGuardar = true
+                        null
+                    }
+
+                    if (
+                        fotografia != null &&
+                        nombreArchivo == null
+                    ) {
+
+                        errorGuardarImagen = true
+
+                    } else {
+
+                        // Registrar motivo, descripción y fotografía
+                        val registrado = onEnviarReporte(
+                            motivo,
+                            descripcion.trim(),
+                            nombreArchivo
+                        )
+
+                        if (registrado) {
+
+                            reporteEnviado = true
+
+                        } else {
+
+                            errorGuardar = true
+
+                            // Eliminar fotografía si falló el reporte
+                            if (nombreArchivo != null) {
+                                context.deleteFile(nombreArchivo)
+                            }
+                        }
                     }
                 }
-
             },
             enabled = !reporteEnviado,
             modifier = Modifier.fillMaxWidth()
-
         ) {
-            Text(stringResource(R.string.reporte_guardar))
+            Text(
+                text = stringResource(R.string.reporte_guardar)
+            )
         }
 
         if (errorGuardar) {
@@ -256,6 +517,5 @@ fun ReportarProblemaScreen(
                 color = MaterialTheme.colorScheme.primary
             )
         }
-
     }
 }

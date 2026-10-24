@@ -165,4 +165,16 @@
     <string name="agente_respuesta_final">Respuesta registrada</string>
     <string name="agente_guardar_primero">Guarda la respuesta antes de resolver.</string>
 
+
+    <string name="reporte_evidencia">Evidencia fotográfica (opcional)</string>
+    <string name="reporte_tomar_foto">Tomar fotografía</string>
+    <string name="reporte_abrir_galeria">Seleccionar de galería</string>
+    <string name="reporte_vista_previa">Vista previa de la fotografía</string>
+    <string name="reporte_quitar_foto">Quitar imagen</string>
+    <string name="reporte_error_imagen">No se pudo abrir la imagen seleccionada.</string>
+
+    <string name="reporte_error_guardar_imagen">No se pudo guardar la fotografía. Intenta nuevamente.</string>
+    <string name="agente_evidencia">Evidencia fotográfica</string>
+    <string name="agente_evidencia_no_disponible">No se pudo cargar la fotografía adjunta.</string>
+
 </resources>

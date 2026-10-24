@@ -14,5 +14,6 @@ data class ReporteProblema(
     val descripcion: String,
     val estadoAnterior: EstadoCompromiso,
     val estado: EstadoReporte = EstadoReporte.PENDIENTE,
-    val respuesta: String = ""
+    val respuesta: String = "",
+    val archivoEvidencia: String? = null
 )

@@ -217,10 +217,13 @@ class InicioUsuarioViewModel : ViewModel() {
     }
 
     // Registrar reporte del usuario
+
+    // Registrar reporte del usuario
     fun registrarReporte(
         folio: String,
         motivo: String,
-        descripcion: String
+        descripcion: String,
+        archivoEvidencia: String? = null
     ): Boolean {
 
         if (
@@ -248,7 +251,8 @@ class InicioUsuarioViewModel : ViewModel() {
             folioCompromiso = folio,
             motivo = motivo,
             descripcion = descripcion.trim(),
-            estadoAnterior = compromiso.estado
+            estadoAnterior = compromiso.estado,
+            archivoEvidencia = archivoEvidencia
         )
 
         reportes = reportes + reporte
@@ -267,6 +271,7 @@ class InicioUsuarioViewModel : ViewModel() {
 
         return true
     }
+
 
     // AGENTE: Marcar reporte como En proceso
     fun iniciarGestionReporte(codigo: String): Boolean {

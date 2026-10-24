@@ -4,6 +4,7 @@ package cl.duoc.pagoflex
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -65,11 +66,12 @@ class MainActivity : ComponentActivity() {
             InicioUsuarioViewModel::class.java
         ]
 
+        inicioUsuarioViewModel.iniciarAlmacenamiento(applicationContext)
+
         setContent {
 
             PagoFlexTheme {
 
-                // Variables para controlar la navegación
                 var rolSeleccionado by rememberSaveable {
                     mutableStateOf("")
                 }
@@ -86,7 +88,6 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf(false)
                 }
 
-                // Navegación del Ejecutivo
                 var mostrarRegistroCompromiso by rememberSaveable {
                     mutableStateOf(false)
                 }
@@ -95,7 +96,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 ) { padding ->
 
-                    // Animación al seleccionar o cambiar de rol
                     Crossfade(
                         targetState = rolSeleccionado,
                         animationSpec = tween(
@@ -104,7 +104,6 @@ class MainActivity : ComponentActivity() {
                         label = "transicionRoles"
                     ) { rolActual ->
 
-                        // PANTALLA DE SELECCIÓN DE ROL
                         if (rolActual.isEmpty()) {
 
                             SeleccionRolScreen(
@@ -114,7 +113,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
 
-                            // R-01: USUARIO FINAL
                         } else if (
                             rolActual == stringResource(R.string.rol_usuario)
                         ) {
@@ -124,7 +122,6 @@ class MainActivity : ComponentActivity() {
                                     inicioUsuarioViewModel.obtenerCompromiso(folio)
                                 }
 
-                            // Formulario para reportar problema
                             if (
                                 mostrarReporte &&
                                 compromisoSeleccionado != null
@@ -138,8 +135,11 @@ class MainActivity : ComponentActivity() {
                                         mostrarReporte = false
                                     },
 
+                                    onEnviarReporte = {
+                                            motivo,
+                                            descripcion,
+                                            archivoEvidencia ->
 
-                                    onEnviarReporte = { motivo, descripcion, archivoEvidencia ->
                                         inicioUsuarioViewModel.registrarReporte(
                                             compromisoSeleccionado.folio,
                                             motivo,
@@ -147,10 +147,8 @@ class MainActivity : ComponentActivity() {
                                             archivoEvidencia
                                         )
                                     }
-
                                 )
 
-                                // Detalle del compromiso
                             } else if (compromisoSeleccionado != null) {
 
                                 DetalleCompromisoScreen(
@@ -177,7 +175,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
 
-                                // Historial de pagos
                             } else if (mostrarHistorial) {
 
                                 HistorialPagosScreen(
@@ -191,7 +188,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
 
-                                // Panel principal del Usuario
                             } else {
 
                                 InicioUsuarioScreen(
@@ -217,7 +213,6 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
-                            // R-02: AGENTE PAGOFLEX
                         } else if (
                             rolActual == stringResource(R.string.rol_agente)
                         ) {
@@ -250,10 +245,8 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
 
-                            // R-03: EJECUTIVO DE EMPRESA
                         } else {
 
-                            // Formulario de nuevo compromiso
                             if (mostrarRegistroCompromiso) {
 
                                 RegistrarCompromisoScreen(
@@ -278,7 +271,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
 
-                                // Panel principal del Ejecutivo
                             } else {
 
                                 InicioEjecutivoScreen(
@@ -312,7 +304,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Pantalla temporal para futuras funcionalidades
 @Composable
 fun PantallaTemporal(
     rol: String,

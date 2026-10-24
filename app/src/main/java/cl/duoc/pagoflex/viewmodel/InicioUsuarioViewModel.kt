@@ -1,6 +1,7 @@
 
 package cl.duoc.pagoflex.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,6 +13,7 @@ import cl.duoc.pagoflex.model.EstadoCompromiso
 import cl.duoc.pagoflex.model.MotivoBloqueoPago
 import cl.duoc.pagoflex.model.ReporteProblema
 import cl.duoc.pagoflex.model.EstadoReporte
+import cl.duoc.pagoflex.util.AlmacenamientoDatos
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -20,7 +22,9 @@ import java.util.UUID
 
 class InicioUsuarioViewModel : ViewModel() {
 
-    // Datos ficticios de los compromisos
+    private var contextoAplicacion: Context? = null
+    private var almacenamientoDisponible = true
+
     var compromisos by mutableStateOf(
         listOf(
             Compromiso(
@@ -51,7 +55,6 @@ class InicioUsuarioViewModel : ViewModel() {
     )
         private set
 
-    // Listas de pagos y reportes
     var comprobantes by mutableStateOf(
         listOf<ComprobantePago>()
     )
@@ -62,18 +65,60 @@ class InicioUsuarioViewModel : ViewModel() {
     )
         private set
 
-    // Motivos de anulación registrados durante la sesión
     var motivosAnulacion by mutableStateOf(
         mapOf<String, String>()
     )
         private set
 
-    // Convertir una fecha a milisegundos para compararla
+    fun iniciarAlmacenamiento(context: Context) {
+
+        if (contextoAplicacion != null) {
+            return
+        }
+
+        val contexto = context.applicationContext
+
+        val existeArchivo = contexto.fileList().contains(
+            "pagoflex_datos.json"
+        )
+
+        val datos = AlmacenamientoDatos.cargarDatos(contexto)
+
+        if (datos != null) {
+            compromisos = datos.compromisos
+            comprobantes = datos.comprobantes
+            reportes = datos.reportes
+            motivosAnulacion = datos.motivosAnulacion
+        }
+
+        almacenamientoDisponible = !existeArchivo || datos != null
+        contextoAplicacion = contexto
+    }
+
+    private fun guardarCambios() {
+
+        if (!almacenamientoDisponible) {
+            return
+        }
+
+        val contexto = contextoAplicacion ?: return
+
+        AlmacenamientoDatos.guardarDatos(
+            context = contexto,
+            compromisos = compromisos,
+            comprobantes = comprobantes,
+            reportes = reportes,
+            motivosAnulacion = motivosAnulacion
+        )
+    }
+
     private fun convertirFecha(fecha: String): Long {
+
         val formato = SimpleDateFormat(
             "dd-MM-yyyy",
             Locale.forLanguageTag("es-CL")
         )
+
         formato.isLenient = false
 
         return try {
@@ -83,7 +128,6 @@ class InicioUsuarioViewModel : ViewModel() {
         }
     }
 
-    // Total pendiente y vencido
     val totalPorPagar: Int
         get() = compromisos
             .filter {
@@ -94,13 +138,11 @@ class InicioUsuarioViewModel : ViewModel() {
                 it.monto + it.recargo
             }
 
-    // Cantidad de compromisos vencidos
     val cantidadVencidos: Int
         get() = compromisos.count {
             it.estado == EstadoCompromiso.VENCIDO
         }
 
-    // Próximo vencimiento pendiente
     val proximoVencimiento: String
         get() {
             return compromisos
@@ -114,14 +156,13 @@ class InicioUsuarioViewModel : ViewModel() {
                 ?.fechaVencimiento ?: ""
         }
 
-    // Buscar compromiso por folio
     fun obtenerCompromiso(folio: String): Compromiso? {
+
         return compromisos.find {
             it.folio == folio
         }
     }
 
-    // Validaciones antes de pagar
     fun validarPago(folio: String): MotivoBloqueoPago? {
 
         val compromiso = obtenerCompromiso(folio)
@@ -145,12 +186,10 @@ class InicioUsuarioViewModel : ViewModel() {
             compromiso.fechaVencimiento
         )
 
-        // No continuar si la fecha no es válida
         if (fechaActual == Long.MAX_VALUE) {
             return MotivoBloqueoPago.NO_ENCONTRADO
         }
 
-        // Verificar compromisos anteriores de la misma empresa
         val existeAnterior = compromisos.any { otro ->
 
             val estadoSinResolver =
@@ -171,7 +210,6 @@ class InicioUsuarioViewModel : ViewModel() {
         return null
     }
 
-    // Registrar pago simulado
     fun simularPago(folio: String): ComprobantePago? {
 
         if (validarPago(folio) != null) {
@@ -198,10 +236,8 @@ class InicioUsuarioViewModel : ViewModel() {
             fechaPago = formato.format(Date())
         )
 
-        // Guardar el comprobante
         comprobantes = comprobantes + comprobante
 
-        // Actualizar el compromiso a Pagado
         compromisos = compromisos.map { actual ->
 
             if (actual.folio == folio) {
@@ -213,12 +249,11 @@ class InicioUsuarioViewModel : ViewModel() {
             }
         }
 
+        guardarCambios()
+
         return comprobante
     }
 
-    // Registrar reporte del usuario
-
-    // Registrar reporte del usuario
     fun registrarReporte(
         folio: String,
         motivo: String,
@@ -257,7 +292,6 @@ class InicioUsuarioViewModel : ViewModel() {
 
         reportes = reportes + reporte
 
-        // El compromiso queda En revisión
         compromisos = compromisos.map { actual ->
 
             if (actual.folio == folio) {
@@ -269,11 +303,11 @@ class InicioUsuarioViewModel : ViewModel() {
             }
         }
 
+        guardarCambios()
+
         return true
     }
 
-
-    // AGENTE: Marcar reporte como En proceso
     fun iniciarGestionReporte(codigo: String): Boolean {
 
         val reporte = reportes.find {
@@ -295,10 +329,11 @@ class InicioUsuarioViewModel : ViewModel() {
             }
         }
 
+        guardarCambios()
+
         return true
     }
 
-    // AGENTE: Guardar respuesta
     fun responderReporte(
         codigo: String,
         respuesta: String
@@ -329,17 +364,17 @@ class InicioUsuarioViewModel : ViewModel() {
             }
         }
 
+        guardarCambios()
+
         return true
     }
 
-    // AGENTE: Resolver el reporte
     fun resolverReporte(codigo: String): Boolean {
 
         val reporte = reportes.find {
             it.codigo == codigo
         } ?: return false
 
-        // Verificar estado y respuesta
         if (
             reporte.estado != EstadoReporte.EN_PROCESO ||
             reporte.respuesta.trim().length < 10
@@ -347,7 +382,6 @@ class InicioUsuarioViewModel : ViewModel() {
             return false
         }
 
-        // Actualizar el reporte
         reportes = reportes.map { actual ->
 
             if (actual.codigo == codigo) {
@@ -359,7 +393,6 @@ class InicioUsuarioViewModel : ViewModel() {
             }
         }
 
-        // Restaurar el estado anterior del compromiso
         compromisos = compromisos.map { compromiso ->
 
             if (
@@ -374,10 +407,11 @@ class InicioUsuarioViewModel : ViewModel() {
             }
         }
 
+        guardarCambios()
+
         return true
     }
 
-    // EJECUTIVO: Registrar un nuevo compromiso
     fun registrarCompromiso(
         empresa: String,
         concepto: String,
@@ -385,7 +419,11 @@ class InicioUsuarioViewModel : ViewModel() {
         fechaVencimiento: String
     ): Boolean {
 
-        if (empresa.isBlank() || concepto.trim().length < 3 || monto <= 0) {
+        if (
+            empresa.isBlank() ||
+            concepto.trim().length < 3 ||
+            monto <= 0
+        ) {
             return false
         }
 
@@ -399,6 +437,7 @@ class InicioUsuarioViewModel : ViewModel() {
             "dd-MM-yyyy",
             Locale.forLanguageTag("es-CL")
         )
+
         formato.isLenient = false
 
         val fecha = try {
@@ -407,20 +446,22 @@ class InicioUsuarioViewModel : ViewModel() {
             null
         } ?: return false
 
-        // La fecha no puede ser anterior a hoy
-        val hoy = formato.parse(formato.format(Date())) ?: return false
+        val hoy = formato.parse(
+            formato.format(Date())
+        ) ?: return false
 
         if (fecha.before(hoy)) {
             return false
         }
 
-        // Generar el siguiente folio
         val ultimoNumero = compromisos.mapNotNull {
+
             if (it.folio.startsWith("CP-")) {
                 it.folio.removePrefix("CP-").toIntOrNull()
             } else {
                 null
             }
+
         }.maxOrNull() ?: 0
 
         val nuevoFolio = "CP-" +
@@ -437,11 +478,11 @@ class InicioUsuarioViewModel : ViewModel() {
 
         compromisos = compromisos + nuevoCompromiso
 
+        guardarCambios()
+
         return true
     }
 
-
-    // EJECUTIVO: Anular un compromiso
     fun anularCompromiso(
         folio: String,
         motivo: String
@@ -449,7 +490,6 @@ class InicioUsuarioViewModel : ViewModel() {
 
         val texto = motivo.trim()
 
-        // El motivo debe tener al menos 10 caracteres
         if (texto.length < 10) {
             return false
         }
@@ -457,7 +497,6 @@ class InicioUsuarioViewModel : ViewModel() {
         val compromiso = obtenerCompromiso(folio)
             ?: return false
 
-        // Solamente se pueden anular pendientes o vencidos
         if (
             compromiso.estado != EstadoCompromiso.PENDIENTE &&
             compromiso.estado != EstadoCompromiso.VENCIDO
@@ -465,10 +504,8 @@ class InicioUsuarioViewModel : ViewModel() {
             return false
         }
 
-        // Guardar el motivo de anulación
         motivosAnulacion = motivosAnulacion + (folio to texto)
 
-        // Cambiar el estado del compromiso
         compromisos = compromisos.map { actual ->
 
             if (actual.folio == folio) {
@@ -479,6 +516,8 @@ class InicioUsuarioViewModel : ViewModel() {
                 actual
             }
         }
+
+        guardarCambios()
 
         return true
     }

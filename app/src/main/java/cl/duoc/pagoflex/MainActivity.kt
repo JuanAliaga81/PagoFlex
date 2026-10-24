@@ -9,6 +9,8 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -93,203 +95,212 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 ) { padding ->
 
-                    // PANTALLA DE SELECCIÓN DE ROL
-                    if (rolSeleccionado.isEmpty()) {
+                    // Animación al seleccionar o cambiar de rol
+                    Crossfade(
+                        targetState = rolSeleccionado,
+                        animationSpec = tween(
+                            durationMillis = 300
+                        ),
+                        label = "transicionRoles"
+                    ) { rolActual ->
 
-                        SeleccionRolScreen(
-                            modifier = Modifier.padding(padding),
-                            onSeleccionarRol = { rol ->
-                                rolSeleccionado = rol
-                            }
-                        )
+                        // PANTALLA DE SELECCIÓN DE ROL
+                        if (rolActual.isEmpty()) {
 
-                        // R-01: USUARIO FINAL
-                    } else if (
-                        rolSeleccionado == stringResource(R.string.rol_usuario)
-                    ) {
+                            SeleccionRolScreen(
+                                modifier = Modifier.padding(padding),
+                                onSeleccionarRol = { rol ->
+                                    rolSeleccionado = rol
+                                }
+                            )
 
-                        val compromisoSeleccionado =
-                            folioSeleccionado?.let { folio ->
-                                inicioUsuarioViewModel.obtenerCompromiso(folio)
-                            }
-
-                        // Formulario para reportar problema
-                        if (
-                            mostrarReporte &&
-                            compromisoSeleccionado != null
+                            // R-01: USUARIO FINAL
+                        } else if (
+                            rolActual == stringResource(R.string.rol_usuario)
                         ) {
 
-                            ReportarProblemaScreen(
-                                compromiso = compromisoSeleccionado,
-                                modifier = Modifier.padding(padding),
-
-                                onVolver = {
-                                    mostrarReporte = false
-                                },
-
-                                onEnviarReporte = { motivo, descripcion ->
-                                    inicioUsuarioViewModel.registrarReporte(
-                                        compromisoSeleccionado.folio,
-                                        motivo,
-                                        descripcion
-                                    )
+                            val compromisoSeleccionado =
+                                folioSeleccionado?.let { folio ->
+                                    inicioUsuarioViewModel.obtenerCompromiso(folio)
                                 }
-                            )
 
-                            // Detalle del compromiso
-                        } else if (compromisoSeleccionado != null) {
+                            // Formulario para reportar problema
+                            if (
+                                mostrarReporte &&
+                                compromisoSeleccionado != null
+                            ) {
 
-                            DetalleCompromisoScreen(
-                                compromiso = compromisoSeleccionado,
+                                ReportarProblemaScreen(
+                                    compromiso = compromisoSeleccionado,
+                                    modifier = Modifier.padding(padding),
 
-                                motivoBloqueo =
-                                    inicioUsuarioViewModel.validarPago(
-                                        compromisoSeleccionado.folio
-                                    ),
+                                    onVolver = {
+                                        mostrarReporte = false
+                                    },
 
-                                modifier = Modifier.padding(padding),
-
-                                onVolver = {
-                                    folioSeleccionado = null
-                                    mostrarReporte = false
-                                },
-
-                                onConfirmarPago = { folio ->
-                                    inicioUsuarioViewModel.simularPago(folio)
-                                },
-
-                                onReportarProblema = {
-                                    mostrarReporte = true
-                                }
-                            )
-
-                            // Historial de pagos
-                        } else if (mostrarHistorial) {
-
-                            HistorialPagosScreen(
-                                comprobantes =
-                                    inicioUsuarioViewModel.comprobantes,
-
-                                modifier = Modifier.padding(padding),
-
-                                onVolver = {
-                                    mostrarHistorial = false
-                                }
-                            )
-
-                            // Panel principal del Usuario
-                        } else {
-
-                            InicioUsuarioScreen(
-                                viewModel = inicioUsuarioViewModel,
-                                modifier = Modifier.padding(padding),
-
-                                onVolver = {
-                                    folioSeleccionado = null
-                                    mostrarHistorial = false
-                                    mostrarReporte = false
-                                    rolSeleccionado = ""
-                                },
-
-                                onSeleccionarCompromiso = { folio ->
-                                    folioSeleccionado = folio
-                                    mostrarHistorial = false
-                                },
-
-                                onVerHistorial = {
-                                    folioSeleccionado = null
-                                    mostrarHistorial = true
-                                }
-                            )
-                        }
-
-                        // R-02: AGENTE PAGOFLEX
-                    } else if (
-                        rolSeleccionado == stringResource(R.string.rol_agente)
-                    ) {
-
-                        InicioAgenteScreen(
-                            reportes = inicioUsuarioViewModel.reportes,
-                            modifier = Modifier.padding(padding),
-
-                            onVolver = {
-                                rolSeleccionado = ""
-                            },
-
-                            onIniciarGestion = { codigo ->
-                                inicioUsuarioViewModel.iniciarGestionReporte(
-                                    codigo
+                                    onEnviarReporte = { motivo, descripcion ->
+                                        inicioUsuarioViewModel.registrarReporte(
+                                            compromisoSeleccionado.folio,
+                                            motivo,
+                                            descripcion
+                                        )
+                                    }
                                 )
-                            },
 
-                            onResponderReporte = { codigo, respuesta ->
-                                inicioUsuarioViewModel.responderReporte(
-                                    codigo,
-                                    respuesta
+                                // Detalle del compromiso
+                            } else if (compromisoSeleccionado != null) {
+
+                                DetalleCompromisoScreen(
+                                    compromiso = compromisoSeleccionado,
+
+                                    motivoBloqueo =
+                                        inicioUsuarioViewModel.validarPago(
+                                            compromisoSeleccionado.folio
+                                        ),
+
+                                    modifier = Modifier.padding(padding),
+
+                                    onVolver = {
+                                        folioSeleccionado = null
+                                        mostrarReporte = false
+                                    },
+
+                                    onConfirmarPago = { folio ->
+                                        inicioUsuarioViewModel.simularPago(folio)
+                                    },
+
+                                    onReportarProblema = {
+                                        mostrarReporte = true
+                                    }
                                 )
-                            },
 
-                            onResolverReporte = { codigo ->
-                                inicioUsuarioViewModel.resolverReporte(
-                                    codigo
+                                // Historial de pagos
+                            } else if (mostrarHistorial) {
+
+                                HistorialPagosScreen(
+                                    comprobantes =
+                                        inicioUsuarioViewModel.comprobantes,
+
+                                    modifier = Modifier.padding(padding),
+
+                                    onVolver = {
+                                        mostrarHistorial = false
+                                    }
+                                )
+
+                                // Panel principal del Usuario
+                            } else {
+
+                                InicioUsuarioScreen(
+                                    viewModel = inicioUsuarioViewModel,
+                                    modifier = Modifier.padding(padding),
+
+                                    onVolver = {
+                                        folioSeleccionado = null
+                                        mostrarHistorial = false
+                                        mostrarReporte = false
+                                        rolSeleccionado = ""
+                                    },
+
+                                    onSeleccionarCompromiso = { folio ->
+                                        folioSeleccionado = folio
+                                        mostrarHistorial = false
+                                    },
+
+                                    onVerHistorial = {
+                                        folioSeleccionado = null
+                                        mostrarHistorial = true
+                                    }
                                 )
                             }
-                        )
 
-                        // R-03: EJECUTIVO DE EMPRESA
-                    } else {
+                            // R-02: AGENTE PAGOFLEX
+                        } else if (
+                            rolActual == stringResource(R.string.rol_agente)
+                        ) {
 
-                        // Formulario de nuevo compromiso
-                        if (mostrarRegistroCompromiso) {
-
-                            RegistrarCompromisoScreen(
-                                empresa = "Crédito Andino",
+                            InicioAgenteScreen(
+                                reportes = inicioUsuarioViewModel.reportes,
                                 modifier = Modifier.padding(padding),
 
                                 onVolver = {
-                                    mostrarRegistroCompromiso = false
-                                },
-
-                                onRegistrar = { concepto, monto, fecha ->
-                                    inicioUsuarioViewModel.registrarCompromiso(
-                                        empresa = "Crédito Andino",
-                                        concepto = concepto,
-                                        monto = monto,
-                                        fechaVencimiento = fecha
-                                    )
-                                },
-
-                                onGuardado = {
-                                    mostrarRegistroCompromiso = false
-                                }
-                            )
-
-                            // Panel principal del Ejecutivo
-                        } else {
-
-
-                            InicioEjecutivoScreen(
-                                compromisos = inicioUsuarioViewModel.compromisos,
-                                empresa = "Crédito Andino",
-                                motivosAnulacion = inicioUsuarioViewModel.motivosAnulacion,
-                                modifier = Modifier.padding(padding),
-
-                                onVolver = {
-                                    mostrarRegistroCompromiso = false
                                     rolSeleccionado = ""
                                 },
 
-                                onNuevoCompromiso = {
-                                    mostrarRegistroCompromiso = true
+                                onIniciarGestion = { codigo ->
+                                    inicioUsuarioViewModel.iniciarGestionReporte(
+                                        codigo
+                                    )
                                 },
 
-                                onAnularCompromiso = { folio, motivo ->
-                                    inicioUsuarioViewModel.anularCompromiso(
-                                        folio = folio,
-                                        motivo = motivo
+                                onResponderReporte = { codigo, respuesta ->
+                                    inicioUsuarioViewModel.responderReporte(
+                                        codigo,
+                                        respuesta
+                                    )
+                                },
+
+                                onResolverReporte = { codigo ->
+                                    inicioUsuarioViewModel.resolverReporte(
+                                        codigo
                                     )
                                 }
                             )
+
+                            // R-03: EJECUTIVO DE EMPRESA
+                        } else {
+
+                            // Formulario de nuevo compromiso
+                            if (mostrarRegistroCompromiso) {
+
+                                RegistrarCompromisoScreen(
+                                    empresa = "Crédito Andino",
+                                    modifier = Modifier.padding(padding),
+
+                                    onVolver = {
+                                        mostrarRegistroCompromiso = false
+                                    },
+
+                                    onRegistrar = { concepto, monto, fecha ->
+                                        inicioUsuarioViewModel.registrarCompromiso(
+                                            empresa = "Crédito Andino",
+                                            concepto = concepto,
+                                            monto = monto,
+                                            fechaVencimiento = fecha
+                                        )
+                                    },
+
+                                    onGuardado = {
+                                        mostrarRegistroCompromiso = false
+                                    }
+                                )
+
+                                // Panel principal del Ejecutivo
+                            } else {
+
+                                InicioEjecutivoScreen(
+                                    compromisos = inicioUsuarioViewModel.compromisos,
+                                    empresa = "Crédito Andino",
+                                    motivosAnulacion = inicioUsuarioViewModel.motivosAnulacion,
+                                    modifier = Modifier.padding(padding),
+
+                                    onVolver = {
+                                        mostrarRegistroCompromiso = false
+                                        rolSeleccionado = ""
+                                    },
+
+                                    onNuevoCompromiso = {
+                                        mostrarRegistroCompromiso = true
+                                    },
+
+                                    onAnularCompromiso = { folio, motivo ->
+                                        inicioUsuarioViewModel.anularCompromiso(
+                                            folio = folio,
+                                            motivo = motivo
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
                 }

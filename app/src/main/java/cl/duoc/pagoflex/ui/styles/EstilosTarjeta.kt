@@ -6,7 +6,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import cl.duoc.pagoflex.ui.theme.Dimens
 
-// Importar Dimens desde ui.theme
 
 object EstilosTarjeta {
 

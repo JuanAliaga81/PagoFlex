@@ -135,7 +135,6 @@ fun TarjetaReporte(
         mutableStateOf(false)
     }
 
-    // Recuperar la fotografía adjunta al reporte
     val context = LocalContext.current
 
     val imagenEvidencia = remember(
@@ -147,7 +146,6 @@ fun TarjetaReporte(
         }
     }
 
-    // Texto del estado actual
     val estadoTexto = when (reporte.estado) {
 
         EstadoReporte.PENDIENTE ->
@@ -212,7 +210,6 @@ fun TarjetaReporte(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            // Mostrar la evidencia fotográfica si existe
             if (reporte.archivoEvidencia != null) {
 
                 Spacer(
@@ -267,7 +264,6 @@ fun TarjetaReporte(
                 modifier = Modifier.height(Dimens.espacioMedio)
             )
 
-            // Acciones según el estado del reporte
             when (reporte.estado) {
 
                 EstadoReporte.PENDIENTE -> {
@@ -286,7 +282,6 @@ fun TarjetaReporte(
 
                 EstadoReporte.EN_PROCESO -> {
 
-                    // Respuesta del agente
                     OutlinedTextField(
                         value = respuestaTexto,
                         onValueChange = { texto ->
@@ -327,7 +322,6 @@ fun TarjetaReporte(
                         )
                     )
 
-                    // Guardar respuesta
                     OutlinedButton(
                         onClick = {
 
@@ -366,7 +360,6 @@ fun TarjetaReporte(
                         modifier = Modifier.height(Dimens.espacioMedio)
                     )
 
-                    // Solo resolver cuando la respuesta esté guardada
                     val puedeResolver =
                         reporte.respuesta.trim().length >= 10 &&
                                 respuestaTexto.trim() == reporte.respuesta
@@ -395,7 +388,6 @@ fun TarjetaReporte(
 
                 EstadoReporte.RESUELTO -> {
 
-                    // Mostrar la respuesta sin permitir editarla
                     Text(
                         text = stringResource(
                             R.string.agente_respuesta_final

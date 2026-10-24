@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Nombre de la aplicación -->
+
     <string name="app_name">PagoFlex</string>
 
-    <!-- Pantalla de selección de roles -->
+
     <string name="titulo_app">PagoFlex</string>
     <string name="descripcion_app">Gestión de pagos y compromisos</string>
     <string name="bienvenido">Bienvenido</string>
     <string name="seleccionar_rol">Selecciona tu tipo de usuario</string>
 
-    <!-- Roles -->
+
     <string name="rol_usuario">Usuario final</string>
     <string name="rol_agente">Agente PagoFlex</string>
     <string name="rol_ejecutivo">Ejecutivo de empresa</string>
 
-    <!-- Textos generales -->
+
     <string name="volver">Volver</string>
     <string name="ingreso_rol">Has ingresado como: %1$s</string>
 
 
-    <!-- Inicio del usuario final -->
+
     <string name="inicio_titulo">Mi resumen</string>
     <string name="inicio_total">Total por pagar este mes</string>
     <string name="inicio_proximo">Próximo vencimiento</string>
@@ -27,7 +27,7 @@
     <string name="inicio_compromisos">Mis compromisos</string>
     <string name="inicio_vence">Vence: %1$s</string>
 
-    <!-- Datos ficticios temporales -->
+
     <string name="ejemplo_total">$ 630.000</string>
     <string name="ejemplo_proximo">25-10-2026</string>
     <string name="ejemplo_vencidos">1</string>
@@ -51,21 +51,21 @@
     <string name="ejemplo_fecha3">20-10-2026</string>
 
 
-    <!-- Formato de montos -->
+
     <string name="formato_monto">$ %1$s</string>
 
-    <!-- Mensajes -->
+
     <string name="inicio_sin_vencimientos">
     No hay vencimientos pendientes
     </string>
 
-    <!-- Estados de compromisos -->
+
     <string name="estado_pagado">Pagado</string>
     <string name="estado_revision">En revisión</string>
     <string name="estado_anulado">Anulado</string>
 
 
-    <!-- Detalle del compromiso -->
+
     <string name="detalle_titulo">Detalle del compromiso</string>
     <string name="detalle_folio">Folio</string>
     <string name="detalle_empresa">Empresa</string>
@@ -77,7 +77,7 @@
     <string name="detalle_estado">Estado</string>
 
 
-    <!-- Pago simulado -->
+
     <string name="pagar_compromiso">Pagar compromiso</string>
     <string name="pago_ya_pagado">Este compromiso ya fue pagado.</string>
     <string name="pago_en_revision">No se puede pagar un compromiso en revisión.</string>
@@ -85,19 +85,19 @@
     <string name="pago_orden">Primero debes resolver el compromiso más antiguo de esta empresa.</string>
     <string name="pago_no_encontrado">No se encontró el compromiso.</string>
 
-    <!-- Aviso temporal -->
+
     <string name="pago_aviso_titulo">Pago simulado</string>
     <string name="pago_aviso_mensaje">Este compromiso cumple las condiciones para pagar. La confirmación del pago se implementará en el siguiente paso. No se ha registrado ningún pago.</string>
     <string name="entendido">Entendido</string>
 
 
-    <!-- Confirmación de pago -->
+
     <string name="pago_confirmar_titulo">Confirmar pago</string>
     <string name="pago_confirmar_mensaje">¿Deseas confirmar el pago total de este compromiso? Esta operación es una simulación.</string>
     <string name="pago_confirmar">Confirmar pago</string>
     <string name="cancelar">Cancelar</string>
 
-    <!-- Comprobante -->
+
     <string name="comprobante_titulo">Comprobante de pago</string>
     <string name="comprobante_codigo">Código: %1$s</string>
     <string name="comprobante_folio">Compromiso: %1$s</string>
@@ -106,12 +106,12 @@
     <string name="comprobante_fecha">Fecha: %1$s</string>
     <string name="cerrar">Cerrar</string>
 
-    <!-- Error de pago -->
+
     <string name="pago_error_titulo">No se pudo registrar el pago</string>
     <string name="pago_error_mensaje">El compromiso no cumple las condiciones para pagar. Revisa su estado e inténtalo nuevamente.</string>
 
 
-    <!-- Historial de pagos -->
+
     <string name="historial_boton">Ver historial de pagos</string>
     <string name="historial_titulo">Mis pagos</string>
     <string name="historial_buscar">Buscar empresa, folio, código o fecha</string>
@@ -123,7 +123,7 @@
     <string name="comprobante_concepto">Concepto: %1$s</string>
 
 
-    <!-- Formulario de reporte -->
+
     <string name="reporte_boton">Reportar problema</string>
     <string name="reporte_titulo">Reportar un problema</string>
     <string name="reporte_motivo">Selecciona el motivo</string>
@@ -140,7 +140,7 @@
     <string name="reporte_exito">Reporte registrado correctamente.</string>
 
 
-    <!-- Agente PagoFlex -->
+
     <string name="agente_titulo">Panel del agente</string>
     <string name="agente_subtitulo">Reportes de los usuarios</string>
     <string name="agente_total">Total de reportes: %1$d</string>
@@ -152,7 +152,7 @@
     <string name="agente_pendiente">Pendiente de atención</string>
 
 
-    <!-- Gestion de reportes del agente -->
+
     <string name="agente_en_proceso">En proceso</string>
     <string name="agente_resuelto">Resuelto</string>
     <string name="agente_iniciar">Marcar en proceso</string>

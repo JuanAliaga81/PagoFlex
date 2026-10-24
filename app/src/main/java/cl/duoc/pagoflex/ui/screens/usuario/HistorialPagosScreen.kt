@@ -32,7 +32,6 @@ fun HistorialPagosScreen(
     onVolver: () -> Unit
 ) {
 
-    // Búsqueda y orden del historial
     var busqueda by rememberSaveable {
         mutableStateOf("")
     }
@@ -41,7 +40,6 @@ fun HistorialPagosScreen(
         mutableStateOf(true)
     }
 
-    // Comprobante que el usuario desea consultar
     var comprobanteSeleccionado by remember {
         mutableStateOf<ComprobantePago?>(null)
     }
@@ -56,7 +54,6 @@ fun HistorialPagosScreen(
         DateTimeFormatter.ofPattern("dd-MM-yyyy")
     }
 
-    // Filtrar por empresa, folio, código o fecha
     val comprobantesFiltrados = comprobantes.filter { pago ->
 
         pago.empresa.contains(busqueda.trim(), ignoreCase = true) ||
@@ -65,7 +62,6 @@ fun HistorialPagosScreen(
                 pago.fechaPago.contains(busqueda.trim())
     }
 
-    // Ordenar por fecha
     val comprobantesOrdenados = comprobantesFiltrados.sortedBy {
         LocalDate.parse(it.fechaPago, formatoFecha)
     }
@@ -104,7 +100,6 @@ fun HistorialPagosScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Campo de búsqueda
         OutlinedTextField(
             value = busqueda,
             onValueChange = {
@@ -121,7 +116,6 @@ fun HistorialPagosScreen(
             modifier = Modifier.height(Dimens.espacioMedio)
         )
 
-        // Cambiar el orden
         OutlinedButton(
             onClick = {
                 recientesPrimero = !recientesPrimero
@@ -140,7 +134,6 @@ fun HistorialPagosScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Mostrar mensaje cuando no hay pagos
         if (comprobantes.isEmpty()) {
 
             Text(
@@ -168,7 +161,6 @@ fun HistorialPagosScreen(
                 modifier = Modifier.height(Dimens.espacioMedio)
             )
 
-            // Mostrar cada pago registrado
             listaFinal.forEach { pago ->
 
                 Card(
@@ -229,7 +221,6 @@ fun HistorialPagosScreen(
         }
     }
 
-    // Mostrar el comprobante seleccionado
     comprobanteSeleccionado?.let { pago ->
 
         AlertDialog(

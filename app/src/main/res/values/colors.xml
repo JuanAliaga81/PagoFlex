@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Colores principales -->
+
     <color name="primario">#5B3FD9</color>
     <color name="primario_oscuro">#3A22A8</color>
     <color name="primario_claro">#C9BEFF</color>
 
-    <!-- Colores secundarios -->
+
     <color name="secundario">#00A6A6</color>
     <color name="acento">#FF6B4A</color>
 
-    <!-- Fondos -->
+
     <color name="blanco">#FFFFFF</color>
     <color name="fondo_claro">#F6F5FB</color>
     <color name="superficie_clara">#FFFFFF</color>
 
-    <!-- Textos -->
+
     <color name="texto_oscuro">#1C1B22</color>
     <color name="texto_gris">#77717E</color>
     <color name="gris_deshabilitado">#BDBAC7</color>
 
-    <!-- Estados -->
+
     <color name="exito">#2E9E5B</color>
     <color name="exito_fondo">#E3F5EA</color>
     <color name="advertencia">#865500</color>

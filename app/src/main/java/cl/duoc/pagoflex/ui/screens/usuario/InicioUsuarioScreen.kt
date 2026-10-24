@@ -30,7 +30,6 @@ import cl.duoc.pagoflex.ui.theme.Dimens
 import java.text.NumberFormat
 import java.util.Locale
 
-// Formatea los montos en pesos chilenos
 private fun formatoNumero(monto: Int): String {
     return NumberFormat.getIntegerInstance(
         Locale.forLanguageTag("es-CL")
@@ -46,12 +45,10 @@ fun InicioUsuarioScreen(
     onVerHistorial: () -> Unit
 ) {
 
-    // Controla la animación de los compromisos
     var mostrarCompromisos by remember {
         mutableStateOf(false)
     }
 
-    // Activa la animación al entrar a la pantalla
     LaunchedEffect(Unit) {
         mostrarCompromisos = true
     }
@@ -64,7 +61,6 @@ fun InicioUsuarioScreen(
             .padding(Dimens.espacioPantalla)
     ) {
 
-        // Botón para regresar a la selección de roles
         OutlinedButton(onClick = onVolver) {
             Text(stringResource(R.string.volver))
         }
@@ -73,7 +69,6 @@ fun InicioUsuarioScreen(
             modifier = Modifier.height(Dimens.espacioMedio)
         )
 
-        // Título de la pantalla
         Text(
             text = stringResource(R.string.inicio_titulo),
             style = MaterialTheme.typography.titleLarge,
@@ -84,7 +79,6 @@ fun InicioUsuarioScreen(
             modifier = Modifier.height(Dimens.espacioMedio)
         )
 
-        // Botón para consultar los pagos realizados
         OutlinedButton(
             onClick = onVerHistorial,
             modifier = Modifier.fillMaxWidth()
@@ -98,7 +92,6 @@ fun InicioUsuarioScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Tarjeta con el resumen financiero
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = EstilosTarjeta.forma,
@@ -112,7 +105,6 @@ fun InicioUsuarioScreen(
                 )
             ) {
 
-                // Total por pagar
                 Text(
                     text = stringResource(R.string.inicio_total),
                     style = MaterialTheme.typography.bodyMedium
@@ -131,7 +123,6 @@ fun InicioUsuarioScreen(
                     modifier = Modifier.height(Dimens.espacioMedio)
                 )
 
-                // Próximo vencimiento
                 Text(
                     text = stringResource(R.string.inicio_proximo),
                     style = MaterialTheme.typography.bodyMedium
@@ -148,7 +139,6 @@ fun InicioUsuarioScreen(
                     modifier = Modifier.height(Dimens.espacioMedio)
                 )
 
-                // Cantidad de compromisos vencidos
                 Text(
                     text = stringResource(R.string.inicio_vencidos),
                     style = MaterialTheme.typography.bodyMedium
@@ -166,7 +156,6 @@ fun InicioUsuarioScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Título del listado de compromisos
         Text(
             text = stringResource(R.string.inicio_compromisos),
             style = MaterialTheme.typography.titleMedium
@@ -176,7 +165,6 @@ fun InicioUsuarioScreen(
             modifier = Modifier.height(Dimens.espacioMedio)
         )
 
-        // Animación para mostrar los compromisos
         AnimatedVisibility(
             visible = mostrarCompromisos,
             enter = fadeIn(
@@ -188,7 +176,6 @@ fun InicioUsuarioScreen(
 
             Column {
 
-                // Mostrar los compromisos del ViewModel
                 viewModel.compromisos.forEach { compromiso ->
 
                     TarjetaCompromiso(
@@ -207,14 +194,12 @@ fun InicioUsuarioScreen(
     }
 }
 
-// Tarjeta reutilizable para mostrar un compromiso
 @Composable
 fun TarjetaCompromiso(
     compromiso: Compromiso,
     onClick: () -> Unit
 ) {
 
-    // Texto correspondiente al estado
     val estadoTexto = when (compromiso.estado) {
 
         EstadoCompromiso.PENDIENTE ->
@@ -233,7 +218,6 @@ fun TarjetaCompromiso(
             stringResource(R.string.estado_anulado)
     }
 
-    // Color según el estado
     val colorEstado = when (compromiso.estado) {
 
         EstadoCompromiso.VENCIDO ->
@@ -261,7 +245,6 @@ fun TarjetaCompromiso(
             )
         ) {
 
-            // Empresa
             Text(
                 text = compromiso.empresa,
                 style = MaterialTheme.typography.titleMedium
@@ -271,13 +254,11 @@ fun TarjetaCompromiso(
                 modifier = Modifier.height(Dimens.espacioChico)
             )
 
-            // Concepto
             Text(
                 text = compromiso.concepto,
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            // Monto total del compromiso
             Text(
                 text = stringResource(
                     R.string.formato_monto,
@@ -289,7 +270,6 @@ fun TarjetaCompromiso(
                 color = MaterialTheme.colorScheme.primary
             )
 
-            // Fecha de vencimiento
             Text(
                 text = stringResource(
                     R.string.inicio_vence,
@@ -298,7 +278,6 @@ fun TarjetaCompromiso(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            // Estado del compromiso
             Text(
                 text = estadoTexto,
                 style = MaterialTheme.typography.labelLarge,

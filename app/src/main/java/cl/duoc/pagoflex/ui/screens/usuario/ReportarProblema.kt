@@ -35,7 +35,6 @@ import cl.duoc.pagoflex.model.Compromiso
 import cl.duoc.pagoflex.ui.theme.Dimens
 import cl.duoc.pagoflex.util.guardarEvidencia
 
-// Cargar una imagen de la galería en tamaño reducido
 private fun cargarImagenGaleria(
     context: Context,
     uri: Uri
@@ -105,7 +104,6 @@ fun ReportarProblemaScreen(
         mutableStateOf(false)
     }
 
-    // Fotografía seleccionada por el usuario
     var imagenSeleccionada by remember {
         mutableStateOf<Bitmap?>(null)
     }
@@ -120,7 +118,6 @@ fun ReportarProblemaScreen(
 
     val context = LocalContext.current
 
-    // Abrir la cámara
     val abrirCamara = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { fotografia ->
@@ -132,7 +129,6 @@ fun ReportarProblemaScreen(
         }
     }
 
-    // Abrir la galería
     val abrirGaleria = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
@@ -205,7 +201,6 @@ fun ReportarProblemaScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Motivo del problema
         Text(
             text = stringResource(R.string.reporte_motivo),
             style = MaterialTheme.typography.titleMedium
@@ -272,7 +267,6 @@ fun ReportarProblemaScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Descripción del problema
         OutlinedTextField(
             value = descripcion,
             onValueChange = { nuevoTexto ->
@@ -323,7 +317,6 @@ fun ReportarProblemaScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Recursos nativos: cámara y galería
         Text(
             text = stringResource(R.string.reporte_evidencia),
             style = MaterialTheme.typography.titleMedium
@@ -365,7 +358,6 @@ fun ReportarProblemaScreen(
             )
         }
 
-        // Vista previa de la fotografía
         imagenSeleccionada?.let { fotografia ->
 
             Spacer(
@@ -432,7 +424,6 @@ fun ReportarProblemaScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Enviar reporte y guardar evidencia
         Button(
             onClick = {
 
@@ -447,7 +438,6 @@ fun ReportarProblemaScreen(
 
                     val fotografia = imagenSeleccionada
 
-                    // Guardar la fotografía si existe
                     val nombreArchivo = if (fotografia != null) {
                         guardarEvidencia(context, fotografia)
                     } else {
@@ -463,7 +453,6 @@ fun ReportarProblemaScreen(
 
                     } else {
 
-                        // Registrar motivo, descripción y fotografía
                         val registrado = onEnviarReporte(
                             motivo,
                             descripcion.trim(),
@@ -478,7 +467,6 @@ fun ReportarProblemaScreen(
 
                             errorGuardar = true
 
-                            // Eliminar fotografía si falló el reporte
                             if (nombreArchivo != null) {
                                 context.deleteFile(nombreArchivo)
                             }

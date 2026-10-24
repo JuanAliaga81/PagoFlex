@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import java.util.UUID
 
-// Guardar una fotografía en el almacenamiento privado
 fun guardarEvidencia(
     context: Context,
     imagen: Bitmap
@@ -42,13 +41,11 @@ fun guardarEvidencia(
     }
 }
 
-// Recuperar una fotografía guardada
 fun cargarEvidencia(
     context: Context,
     nombreArchivo: String
 ): Bitmap? {
 
-    // Evitar nombres de archivo no válidos
     if (!nombreArchivo.matches(
             Regex("""evidencia_[a-fA-F0-9-]+\.jpg""")
         )

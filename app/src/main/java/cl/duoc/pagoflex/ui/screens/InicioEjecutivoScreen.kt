@@ -59,12 +59,10 @@ fun InicioEjecutivoScreen(
         mutableStateOf("")
     }
 
-    // Mostrar solamente compromisos de esta empresa
     val compromisosEmpresa = compromisos.filter {
         it.empresa == empresa
     }
 
-    // Aplicar filtro seleccionado
     val compromisosFiltrados = compromisosEmpresa.filter {
 
         when (filtroSeleccionado) {
@@ -88,7 +86,6 @@ fun InicioEjecutivoScreen(
         }
     }
 
-    // Calcular el total pendiente
     val totalPendiente = compromisosEmpresa
         .filter {
             it.estado == EstadoCompromiso.PENDIENTE ||
@@ -131,7 +128,6 @@ fun InicioEjecutivoScreen(
             style = MaterialTheme.typography.titleLarge
         )
 
-        // Resumen de cobranza
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -158,7 +154,6 @@ fun InicioEjecutivoScreen(
             }
         }
 
-        // Registrar nuevos compromisos
         Button(
             onClick = onNuevoCompromiso,
             modifier = Modifier.fillMaxWidth()
@@ -171,7 +166,6 @@ fun InicioEjecutivoScreen(
             style = MaterialTheme.typography.titleLarge
         )
 
-        // Filtros
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -252,7 +246,6 @@ fun InicioEjecutivoScreen(
                             }"
                         )
 
-                        // Mostrar motivo si fue anulado
                         if (
                             compromiso.estado == EstadoCompromiso.ANULADO
                         ) {
@@ -269,7 +262,6 @@ fun InicioEjecutivoScreen(
                             }
                         }
 
-                        // Botón disponible solo en estados permitidos
                         val puedeAnular =
                             compromiso.estado == EstadoCompromiso.PENDIENTE ||
                                     compromiso.estado == EstadoCompromiso.VENCIDO

@@ -37,14 +37,12 @@ fun DetalleCompromisoScreen(
 ) {
 
 
-    // Formato de montos en pesos chilenos
     val formato = NumberFormat.getIntegerInstance(
         Locale.forLanguageTag("es-CL")
     )
 
     val total = compromiso.monto + compromiso.recargo
 
-    // Variables para controlar los avisos
     var mostrarConfirmacion by remember {
         mutableStateOf(false)
     }
@@ -57,7 +55,6 @@ fun DetalleCompromisoScreen(
         mutableStateOf(false)
     }
 
-    // Texto correspondiente al estado
     val estadoTexto = when (compromiso.estado) {
 
         EstadoCompromiso.PENDIENTE ->
@@ -76,7 +73,6 @@ fun DetalleCompromisoScreen(
             stringResource(R.string.estado_anulado)
     }
 
-    // Mensaje cuando no se puede pagar
     val mensajeBloqueo = when (motivoBloqueo) {
 
         MotivoBloqueoPago.NO_ENCONTRADO ->
@@ -97,7 +93,6 @@ fun DetalleCompromisoScreen(
         null -> null
     }
 
-    // Pantalla principal del detalle
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -124,7 +119,6 @@ fun DetalleCompromisoScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Tarjeta con la información del compromiso
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = EstilosTarjeta.forma,
@@ -205,7 +199,6 @@ fun DetalleCompromisoScreen(
             modifier = Modifier.height(Dimens.espacioGrande)
         )
 
-        // Botón para iniciar el pago simulado
         Button(
             onClick = {
                 mostrarConfirmacion = true
@@ -235,7 +228,6 @@ fun DetalleCompromisoScreen(
         }
 
 
-        // Explicar por qué el botón está deshabilitado
         if (mensajeBloqueo != null) {
 
             Spacer(
@@ -250,7 +242,6 @@ fun DetalleCompromisoScreen(
         }
     }
 
-    // Confirmación del pago simulado
     if (mostrarConfirmacion) {
 
         AlertDialog(
@@ -303,7 +294,6 @@ fun DetalleCompromisoScreen(
         )
     }
 
-    // Comprobante después de confirmar el pago
     comprobanteCreado?.let { comprobante ->
 
         AlertDialog(
@@ -375,7 +365,6 @@ fun DetalleCompromisoScreen(
         )
     }
 
-    // Mensaje si el pago no puede registrarse
     if (mostrarError) {
 
         AlertDialog(
@@ -407,7 +396,6 @@ fun DetalleCompromisoScreen(
     }
 }
 
-// Componente reutilizable para mostrar cada dato
 @Composable
 private fun DatoDetalle(
     titulo: String,
